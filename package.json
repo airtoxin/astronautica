@@ -1,0 +1,10 @@
+{
+  "name": "astronautica",
+  "version": "0.0.1",
+  "description": "Postman alternative with better scripting experience",
+  "main": "index.js",
+  "repository": "git@github.com:airtoxin/astronautica.git",
+  "author": "airtoxin <airtoxin@icloud.com>",
+  "license": "MIT",
+  "private": true
+}
