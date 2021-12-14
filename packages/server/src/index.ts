@@ -2,6 +2,7 @@ import { inferAsyncReturnType, router } from "@trpc/server";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import express from "express";
 import { z } from "zod";
+import cors from "cors";
 
 export type AppRouter = typeof appRouter;
 export type Context = inferAsyncReturnType<typeof createContext>;
@@ -26,6 +27,7 @@ const appRouter = router()
   });
 
 const app = express();
+app.use(cors());
 
 const createContext = () => ({});
 
@@ -37,4 +39,6 @@ app.use(
   })
 );
 
-app.listen(8080);
+app.listen(8080, () => {
+  console.log(`Server listening port 8080`);
+});
