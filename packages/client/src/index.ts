@@ -8,14 +8,6 @@ export const request = (
   return new AstronauticaClient(input, init);
 };
 
-export const createRequester = (
-  recordingServerAddress: string
-): typeof request => {
-  return (input: RequestInfo, init?: RequestInit): AstronauticaClient => {
-    return new AstronauticaClient(input, init, recordingServerAddress);
-  };
-};
-
 class AstronauticaClient {
   private req: Request;
   private preReq: Request;
@@ -25,11 +17,7 @@ class AstronauticaClient {
     | undefined;
   private testCallback: ((res: Response) => unknown) | undefined;
 
-  constructor(
-    private input: RequestInfo,
-    private init?: RequestInit,
-    private recordingServerAddress = "http://localhost:8000"
-  ) {
+  constructor(private input: RequestInfo, private init?: RequestInit) {
     this.req = new Request(input, init);
     this.preReq = this.req.clone();
   }

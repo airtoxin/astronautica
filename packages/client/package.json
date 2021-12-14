@@ -1,5 +1,5 @@
 {
-  "name": "@astronautica/core",
+  "name": "@astronautica/client",
   "version": "0.0.1",
   "scripts": {
     "dev": "tsc -w",
