@@ -16,7 +16,7 @@ export const request = (
 
 class AstronauticaClient {
   private req: Request;
-  private preReq: Request;
+  private preReq: Promise<Request>;
   private res: Response | undefined;
   private preReqCallback:
     | ((req: Request) => Request | Promise<Request>)
@@ -25,33 +25,35 @@ class AstronauticaClient {
 
   constructor(private input: RequestInfo, private init?: RequestInit) {
     this.req = new Request(input, init);
-    this.preReq = this.req.clone();
+    this.preReq = Promise.resolve(this.req.clone());
   }
 
-  async preRequest(
-    callback: (req: Request) => Request | Promise<Request>
-  ): Promise<this> {
+  preRequest(callback: (req: Request) => Request | Promise<Request>): this {
     this.preReqCallback = callback;
-    this.preReq = await callback(this.req);
+    this.preReq = Promise.resolve(callback(this.req.clone()));
     return this;
   }
 
-  async test(callback: (res: Response) => unknown): Promise<this> {
+  test(callback: (res: Response) => unknown): this {
     this.testCallback = callback;
+    return this;
+  }
+
+  async run(): Promise<Response> {
     return fetch(this.input, this.init).then(async (res) => {
       this.res = res.clone();
-      await callback(res.clone());
+      await this.testCallback?.(res.clone());
       await client.mutation("requestSample.add", {
         requestSample: await this.serialize(),
       });
-      return this;
+      return res;
     });
   }
 
   async serialize() {
     return {
       req: serializeRequest(this.req),
-      preReq: serializeRequest(this.preReq),
+      preReq: serializeRequest(await this.preReq),
       res: await serializeResponse(this.res),
       preReqCallback: serializeCallback(this.preReqCallback),
       testCallback: serializeCallback(this.testCallback),

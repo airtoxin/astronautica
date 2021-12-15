@@ -44,8 +44,7 @@ export const requestSampleRouter = router().mutation("add", {
     requestSample: RequestSampleRequestSchema,
   }),
   resolve: async (req) => {
-    console.log("@req.input", req.input);
-    const result = await prisma.requestSample.create({
+    const { id } = await prisma.requestSample.create({
       data: {
         request: JSON.stringify(req.input.requestSample.req),
         preRequest: JSON.stringify(req.input.requestSample.preReq),
@@ -54,6 +53,11 @@ export const requestSampleRouter = router().mutation("add", {
         testCallback: req.input.requestSample.testCallback,
       },
     });
-    return result;
+    const result = await prisma.requestSample.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    return RequestSampleRequestSchema.strip().parse(result);
   },
 });
