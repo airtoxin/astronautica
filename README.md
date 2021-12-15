@@ -26,10 +26,10 @@ describe("My API v3", () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ hello: "world!" })
+      body: JSON.stringify({ hello: "world!" }),
     }).test((res) => {
       expect(res.status).toBe(200);
-    })
+    });
   });
 });
 ```
