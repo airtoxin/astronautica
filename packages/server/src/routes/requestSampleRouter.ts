@@ -1,5 +1,6 @@
 import { router } from "@trpc/server";
 import { z } from "zod";
+import { prisma } from "../prisma";
 
 export const RequestObjectSchema = z.object({
   cache: z.string().nullish(),
@@ -43,7 +44,16 @@ export const requestSampleRouter = router().mutation("add", {
     requestSample: RequestSampleRequestSchema,
   }),
   resolve: async (req) => {
-    console.log("@requestSample", req.input.requestSample);
-    return req.input.requestSample;
+    console.log("@req.input", req.input);
+    const result = await prisma.requestSample.create({
+      data: {
+        request: JSON.stringify(req.input.requestSample.req),
+        preRequest: JSON.stringify(req.input.requestSample.preReq),
+        response: JSON.stringify(req.input.requestSample.res),
+        preRequestCallback: req.input.requestSample.preReqCallback,
+        testCallback: req.input.requestSample.testCallback,
+      },
+    });
+    return result;
   },
 });
