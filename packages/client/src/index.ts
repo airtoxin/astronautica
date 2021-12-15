@@ -1,20 +1,18 @@
 import "isomorphic-fetch";
 import { format } from "prettier";
 import { AppRouter } from "@astronautica/server/dist/routes";
-import { createTRPCClient } from "@trpc/react";
+import { createTRPCClient, TRPCClient } from "@trpc/react";
 
-const client = createTRPCClient<AppRouter>({
-  url: "http://localhost:8080/trpc",
-});
-
-export const request = (
-  input: RequestInfo,
-  init?: RequestInit
-): AstronauticaClient => {
-  return new AstronauticaClient(input, init);
+export const createRequester = (
+  serverAddress = "http://localhost:8080/trpc"
+): ((input: RequestInfo, init?: RequestInit) => AstronauticaClient) => {
+  return (input: RequestInfo, init?: RequestInit): AstronauticaClient => {
+    return new AstronauticaClient(serverAddress, input, init);
+  };
 };
 
 class AstronauticaClient {
+  private client: TRPCClient<AppRouter>;
   private req: Request;
   private preReq: Promise<Request>;
   private res: Response | undefined;
@@ -23,7 +21,14 @@ class AstronauticaClient {
     | undefined;
   private testCallback: ((res: Response) => unknown) | undefined;
 
-  constructor(private input: RequestInfo, private init?: RequestInit) {
+  constructor(
+    serverAddress: string,
+    private input: RequestInfo,
+    private init?: RequestInit
+  ) {
+    this.client = createTRPCClient<AppRouter>({
+      url: serverAddress,
+    });
     this.req = new Request(input, init);
     this.preReq = Promise.resolve(this.req.clone());
   }
@@ -43,7 +48,7 @@ class AstronauticaClient {
     return fetch(this.input, this.init).then(async (res) => {
       this.res = res.clone();
       await this.testCallback?.(res.clone());
-      await client.mutation("requestSample.add", {
+      await this.client.mutation("requestSample.add", {
         requestSample: await this.serialize(),
       });
       return res;
