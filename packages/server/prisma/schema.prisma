@@ -8,12 +8,12 @@ datasource db {
 }
 
 model RequestSample {
-  id        String      @id  @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  request   Json
-  preRequest Json
-  response Json?
+  id                 String   @id @default(uuid())
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  request            Json
+  preRequest         Json
+  response           Json?
   preRequestCallback String?
-  testCallback String?
+  testCallback       String?
 }
