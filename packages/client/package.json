@@ -6,6 +6,8 @@
     "test:unit": "jest"
   },
   "devDependencies": {
+    "@astronautica/server": "0.0.1",
+    "@trpc/react": "9.16.0",
     "@types/isomorphic-fetch": "0.0.35",
     "@types/jest": "27.0.3",
     "@types/node": "16.11.12",

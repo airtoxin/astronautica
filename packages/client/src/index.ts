@@ -1,5 +1,11 @@
 import "isomorphic-fetch";
 import { format } from "prettier";
+import { AppRouter } from "@astronautica/server/dist/routes";
+import { createTRPCClient } from "@trpc/react";
+
+const client = createTRPCClient<AppRouter>({
+  url: "http://localhost:8080/trpc",
+});
 
 export const request = (
   input: RequestInfo,
@@ -35,15 +41,18 @@ class AstronauticaClient {
     return fetch(this.input, this.init).then(async (res) => {
       this.res = res.clone();
       await callback(res.clone());
+      await client.mutation("requestSample.add", {
+        requestSample: await this.serialize(),
+      });
       return this;
     });
   }
 
-  serialize() {
+  async serialize() {
     return {
       req: serializeRequest(this.req),
       preReq: serializeRequest(this.preReq),
-      res: serializeResponse(this.res),
+      res: await serializeResponse(this.res),
       preReqCallback: serializeCallback(this.preReqCallback),
       testCallback: serializeCallback(this.testCallback),
     };
@@ -62,9 +71,8 @@ const serializeRequest = (req: Request) => ({
   redirect: req.redirect,
   referrer: req.referrer,
   referrerPolicy: req.referrerPolicy,
-  signal: req.signal,
   url: req.url,
-  body: req.body,
+  body: req.body == null ? undefined : JSON.stringify(req.body),
   bodyUsed: req.bodyUsed,
 });
 
