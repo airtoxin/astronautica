@@ -1,7 +1,7 @@
 import { fetch, Request, RequestInfo, RequestInit, Response } from "undici";
 import { format } from "prettier";
 import { AppRouter } from "@astronautica/server/dist/routes";
-import { createTRPCClient, TRPCClient } from "@trpc/react";
+import { createTRPCClient, TRPCClient } from "@trpc/client";
 import {
   RequestObject,
   ResponseObject,
