@@ -1,15 +1,11 @@
-import { inferAsyncReturnType } from "@trpc/server";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import express from "express";
 import cors from "cors";
 import { appRouter } from "./routes";
-
-export type Context = inferAsyncReturnType<typeof createContext>;
+import { createContext } from "./context";
 
 const app = express();
 app.use(cors());
-
-const createContext = () => ({});
 
 app.use(
   "/trpc",

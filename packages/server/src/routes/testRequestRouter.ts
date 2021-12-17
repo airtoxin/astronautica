@@ -1,6 +1,7 @@
-import { router } from "@trpc/server";
 import { prisma } from "../prisma";
 import { z } from "zod";
+import { createRouter } from "./helper";
+import { TRPCError } from "@trpc/server";
 
 export type RequestObject = z.TypeOf<typeof RequestObjectSchema>;
 export const RequestObjectSchema = z.object({
@@ -35,12 +36,18 @@ export const TestAddRequestDataSchema = z.object({
   }),
 });
 
-export const testRequestRouter = router().mutation("add", {
+export const testRequestRouter = createRouter().mutation("add", {
   input: TestAddRequestDataSchema,
-  resolve: async (req) => {
-    const data = req.input.data;
+  resolve: async ({ input, ctx }) => {
+    const data = input.data;
+    if (ctx.project == null) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: ctx.reason });
+    }
+    const project = ctx.project;
+
     const result = await prisma.testFile.create({
       data: {
+        projectId: project.id,
         path: data.path,
         testRequests: {
           create: [
@@ -54,11 +61,7 @@ export const testRequestRouter = router().mutation("add", {
           ],
         },
       },
-      include: {
-        testRequests: true,
-      },
     });
-    console.log("@result", result);
     return true;
   },
 });

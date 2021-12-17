@@ -1,9 +1,9 @@
-import { router } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { addDays } from "date-fns";
+import { createRouter } from "./helper";
 
-export const projectRouter = router().mutation("init", {
+export const projectRouter = createRouter().mutation("init", {
   input: z.object({
     projectName: z.string(),
   }),
