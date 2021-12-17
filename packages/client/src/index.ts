@@ -9,10 +9,11 @@ import {
 } from "@astronautica/server/dist/routes/testRequestRouter";
 
 export const createRequester = (
-  serverAddress: string
+  serverAddress: string,
+  apiKey?: string
 ): ((input: RequestInfo, init?: RequestInit) => AstronauticaClient) => {
   return (input: RequestInfo, init?: RequestInit): AstronauticaClient => {
-    return new AstronauticaClient(serverAddress, input, init);
+    return new AstronauticaClient(serverAddress, input, init, apiKey);
   };
 };
 
@@ -28,11 +29,16 @@ class AstronauticaClient {
   constructor(
     serverAddress: string,
     private input: RequestInfo,
-    private init?: RequestInit
+    private init?: RequestInit,
+    apiKey?: string
   ) {
+    const apiKeyDefined = apiKey ?? readApiKeyFromEnv();
     this.client = createTRPCClient<AppRouter>({
       url: serverAddress,
       fetch: fetch as any, // almost compatible with fetch
+      headers: {
+        Authorization: `Bearer ${apiKeyDefined}`,
+      },
     });
     this.req = new Request(input, init);
   }
@@ -78,6 +84,13 @@ class AstronauticaClient {
     };
   }
 }
+
+const readApiKeyFromEnv = (): string => {
+  if (process.env.ASTRONAUTICA_API_KEY) return process.env.ASTRONAUTICA_API_KEY;
+  // TODO: read from config file
+  // TODO: read from package.json
+  throw new Error(`API Key not found.`);
+};
 
 const serializeRequest = (req: Request): RequestObject => ({
   method: req.method,
