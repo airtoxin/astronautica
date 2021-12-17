@@ -7,20 +7,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Project {
+  id        String     @id @default(uuid())
+  name      String
+  testFiles TestFile[]
+  apiKeys   ApiKey[]
+}
+
+model ApiKey {
+  id          String       @id @default(uuid())
+  status      ApiKeyStatus
+  description String?
+  expiresAt   DateTime?
+  lastUsedAt  DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  Project     Project      @relation(fields: [projectId], references: [id])
+  projectId   String
+}
+
+enum ApiKeyStatus {
+  ENABLE
+  DISABLE
+}
+
 model TestFile {
   id           String        @id @default(uuid())
   path         String
   testRequests TestRequest[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  Project      Project       @relation(fields: [projectId], references: [id])
+  projectId    String
 }
 
 model TestRequest {
   id                 String   @id @default(uuid())
-  request            Json
-  preRequest         Json
-  response           Json?
+  preRequest         Json?
   preRequestCallback String?
+  request            Json
+  response           Json
   testCallback       String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt

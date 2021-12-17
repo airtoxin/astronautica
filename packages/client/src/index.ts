@@ -2,6 +2,11 @@ import { fetch, Request, RequestInfo, RequestInit, Response } from "undici";
 import { format } from "prettier";
 import { AppRouter } from "@astronautica/server/dist/routes";
 import { createTRPCClient, TRPCClient } from "@trpc/react";
+import {
+  RequestObject,
+  ResponseObject,
+  TestAddRequestData,
+} from "@astronautica/server/dist/routes/testRequestRouter";
 
 export const createRequester = (
   serverAddress: string
@@ -12,10 +17,9 @@ export const createRequester = (
 };
 
 class AstronauticaClient {
-  private client: TRPCClient<AppRouter>;
-  private req: Request;
-  private preReq: Promise<Request>;
-  private res: Response | undefined;
+  private readonly client: TRPCClient<AppRouter>;
+  private readonly req: Request;
+  private preReq: Promise<Request> | undefined;
   private preReqCallback:
     | ((req: Request) => Request | Promise<Request>)
     | undefined;
@@ -31,7 +35,6 @@ class AstronauticaClient {
       fetch: fetch as any, // almost compatible with fetch
     });
     this.req = new Request(input, init);
-    this.preReq = Promise.resolve(this.req.clone());
   }
 
   preRequest(callback: (req: Request) => Request | Promise<Request>): this {
@@ -47,56 +50,49 @@ class AstronauticaClient {
 
   async run(): Promise<Response> {
     return fetch(this.input, this.init).then(async (res) => {
-      this.res = res.clone();
       await this.testCallback?.(res.clone());
-      await this.client.mutation("requestSample.add", {
-        requestSample: await this.serialize(),
-      });
+      await this.client.mutation(
+        "testRequest.add",
+        await this.serialize(res.clone())
+      );
       return res;
     });
   }
 
-  async serialize() {
+  async serialize(res: Response): Promise<TestAddRequestData> {
+    const testState = expect.getState();
     return {
-      req: serializeRequest(this.req),
-      preReq: serializeRequest(await this.preReq),
-      res: await serializeResponse(this.res),
-      preReqCallback: serializeCallback(this.preReqCallback),
-      testCallback: serializeCallback(this.testCallback),
+      data: {
+        path: testState.testPath,
+        testRequest: {
+          preRequest:
+            this.preReq == null
+              ? undefined
+              : serializeRequest(await this.preReq),
+          preRequestCallback: serializeCallback(this.preReqCallback),
+          request: serializeRequest(this.req),
+          response: await serializeResponse(res),
+          testCallback: serializeCallback(this.testCallback),
+        },
+      },
     };
   }
 }
 
-const serializeRequest = (req: Request) => ({
-  cache: req.cache,
-  credentials: req.credentials,
-  destination: req.destination,
-  headers: serializeHeaders(req.headers),
-  integrity: req.integrity,
-  keepalive: req.keepalive,
+const serializeRequest = (req: Request): RequestObject => ({
   method: req.method,
-  mode: req.mode,
-  redirect: req.redirect,
-  referrerPolicy: req.referrerPolicy,
   url: req.url,
+  headers: serializeHeaders(req.headers),
   body: req.body == null ? undefined : JSON.stringify(req.body),
-  bodyUsed: req.bodyUsed,
 });
 
-const serializeResponse = async (res: Response | undefined) =>
-  res == null
-    ? undefined
-    : {
-        headers: serializeHeaders(res.headers),
-        ok: res.ok,
-        redirected: res.redirected,
-        status: res.status,
-        statusText: res.statusText,
-        type: res.type,
-        url: res.url,
-        body: await res.text(),
-        bodyUsed: res.bodyUsed,
-      };
+const serializeResponse = async (res: Response): Promise<ResponseObject> => ({
+  url: res.url,
+  status: res.status,
+  body: await res.text(),
+  headers: serializeHeaders(res.headers),
+  redirected: res.redirected,
+});
 
 const serializeHeaders = (headers: Headers) => {
   const h: { [key: string]: string } = {};
