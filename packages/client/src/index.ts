@@ -1,4 +1,4 @@
-import "isomorphic-fetch";
+import { fetch, Request, Response, RequestInfo, RequestInit } from "undici";
 import { format } from "prettier";
 import { AppRouter } from "@astronautica/server/dist/routes";
 import { createTRPCClient, TRPCClient } from "@trpc/react";
@@ -28,6 +28,7 @@ class AstronauticaClient {
   ) {
     this.client = createTRPCClient<AppRouter>({
       url: serverAddress,
+      fetch: fetch as any // almost compatible with fetch
     });
     this.req = new Request(input, init);
     this.preReq = Promise.resolve(this.req.clone());
@@ -76,7 +77,6 @@ const serializeRequest = (req: Request) => ({
   method: req.method,
   mode: req.mode,
   redirect: req.redirect,
-  referrer: req.referrer,
   referrerPolicy: req.referrerPolicy,
   url: req.url,
   body: req.body == null ? undefined : JSON.stringify(req.body),
