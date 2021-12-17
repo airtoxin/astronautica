@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "tsc -w",
+    "build": "tsc",
     "test": "run-p -l test:*",
     "test:unit": "jest"
   },

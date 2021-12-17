@@ -13,6 +13,7 @@
   },
   "scripts": {
     "dev": "dotenv -- wsrun --parallel dev",
+    "build": "dotenv -- wsrun --staged --exclude-missing build",
     "format": "dotenv -- eslint --fix --ignore-path .gitignore --ext .js,.ts,.json .",
     "lint": "dotenv -- eslint --ignore-path .gitignore --ext .js,.ts,.json .",
     "test": "dotenv -- wsrun --parallel --exclude-missing test"
