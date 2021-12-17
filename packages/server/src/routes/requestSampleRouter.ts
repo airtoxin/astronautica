@@ -15,7 +15,7 @@ export const RequestObjectSchema = z.object({
   referrerPolicy: z.string().nullish(),
   url: z.string(),
   body: z.string().nullish(),
-  bodyUsed: z.boolean(),
+  bodyUsed: z.boolean().nullish(),
 });
 
 export const ResponseObjectSchema = z.object({
@@ -57,6 +57,6 @@ export const requestSampleRouter = router().mutation("add", {
         id: id,
       },
     });
-    return RequestSampleRequestSchema.strip().parse(result);
+    return RequestSampleRequestSchema.strip().safeParse(result);
   },
 });
