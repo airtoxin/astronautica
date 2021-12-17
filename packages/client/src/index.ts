@@ -1,4 +1,4 @@
-import { fetch, Request, Response, RequestInfo, RequestInit } from "undici";
+import { fetch, Request, RequestInfo, RequestInit, Response } from "undici";
 import { format } from "prettier";
 import { AppRouter } from "@astronautica/server/dist/routes";
 import { createTRPCClient, TRPCClient } from "@trpc/react";
@@ -107,4 +107,6 @@ const serializeHeaders = (headers: Headers) => {
 };
 
 const serializeCallback = (callback: ((...args: any[]) => any) | undefined) =>
-  callback == null ? undefined : format(callback.toString());
+  callback == null
+    ? undefined
+    : format(callback.toString(), { parser: "babel" });
