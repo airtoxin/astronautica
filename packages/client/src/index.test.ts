@@ -1,78 +1,107 @@
 import { createRequester } from "./index";
-import fetchMock from "fetch-mock";
+import express, { RequestHandler } from "express";
+import { Server } from "http";
 
 describe("request", () => {
-  const createDefaultContext = () => {
-    const serverAddress = "http://localhost:1234";
-    const requestUrl = "https://example.com";
-    const mockServerResponseBody = {
-      id: null,
-      result: {
-        type: "data",
-        data: {},
-      },
-    };
-    const mockRequestResponse = "mocked response";
-    const request = createRequester(serverAddress);
-    return {
-      request,
-      serverAddress,
-      requestUrl,
-      mockRequestResponse,
-      mockServerResponseBody,
-    };
+  const astronauticaApp = express().use(express.json());
+  let astronauticaServer: Server | undefined;
+  const astronauticaCallbackRef: { callback: RequestHandler } = {
+    callback: () => {
+      // reset by beforeEach hook
+    },
   };
+  astronauticaApp.all("/*", (req, res, next) => {
+    astronauticaCallbackRef.callback(req, res, next);
+  });
+
+  const contentApp = express().use(express.json());
+  let contentServer: Server | undefined;
+  const contentCallbackRef: { callback: RequestHandler } = {
+    callback: () => {
+      // reset by beforeEach hook
+    },
+  };
+  contentApp.all("/*", (req, res, next) => {
+    contentCallbackRef.callback(req, res, next);
+  });
 
   beforeEach(() => {
-    const {
-      serverAddress,
-      requestUrl,
-      mockServerResponseBody,
-      mockRequestResponse,
-    } = createDefaultContext();
+    astronauticaCallbackRef.callback = (req, res) => {
+      res.send({
+        id: null,
+        result: {
+          type: "data",
+          data: {
+            id: "1",
+            title: "Hello tRPC",
+            body: "...",
+          },
+        },
+      });
+    };
+    contentCallbackRef.callback = (req, res) => {
+      res.send("Hello world");
+    };
 
-    fetchMock.reset();
-    fetchMock.post(`begin:${serverAddress}`, {
-      status: 200,
-      body: mockServerResponseBody,
-    });
-    fetchMock.get(requestUrl, {
-      status: 200,
-      body: mockRequestResponse,
-    });
+    return Promise.all([
+      new Promise<void>((resolve) => {
+        astronauticaServer = astronauticaApp.listen(1234, resolve);
+      }),
+      new Promise<void>((resolve) => {
+        contentServer = contentApp.listen(1235, resolve);
+      }),
+    ]);
+  });
+
+  afterEach(() => {
+    return Promise.all([
+      new Promise<any>((resolve) => astronauticaServer?.close(resolve)),
+      new Promise<any>((resolve) => contentServer?.close(resolve)),
+    ]);
   });
 
   it("Astronautica サーバーにリクエストを送信していること", async () => {
-    const { request, serverAddress, requestUrl, mockServerResponseBody } =
-      createDefaultContext();
+    astronauticaCallbackRef.callback = (req, res) => {
+      expect(req.body).toMatchObject({
+        0: {
+          requestSample: expect.any(Object),
+        },
+      });
+      res.send({
+        id: null,
+        result: {
+          type: "data",
+          data: {
+            id: "1",
+            title: "Hello tRPC",
+            body: "...",
+          },
+        },
+      });
+    };
 
-    fetchMock.post(
-      `begin:${serverAddress}`,
-      (_, req) => {
-        expect(typeof req.body).toBe("string");
-        return {
-          status: 200,
-          body: mockServerResponseBody,
-        };
-      },
-      { overwriteRoutes: true }
-    );
-
-    await request(requestUrl).run();
+    const request = createRequester("http://localhost:1234");
+    await request("https://example.com").run();
 
     expect.assertions(1);
   });
 
-  it("リクエスト結果を取得できること", async () => {
-    const { request, requestUrl, mockRequestResponse } = createDefaultContext();
-    const res = await request(requestUrl)
-      .test((res) => {
-        expect(res.status).toBe(200);
-      })
-      .run();
-    expect(res.status).toBe(200);
+  it("コンテンツサーバーへリクエストを実施していること", async () => {
+    contentCallbackRef.callback = (req, res) => {
+      expect(req.method).toBe("POST");
+      expect(req.body).toEqual({ foo: "bar" });
+      res.send("OK");
+    };
 
-    const body = await res.text();
-    expect(body).toBe(mockRequestResponse);
+    const request = createRequester("http://localhost:1234");
+    await request("http://localhost:1235", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ foo: "bar" }),
+    }).run();
+
+    expect.assertions(2);
   });
 });

@@ -4,7 +4,7 @@ import { AppRouter } from "@astronautica/server/dist/routes";
 import { createTRPCClient, TRPCClient } from "@trpc/react";
 
 export const createRequester = (
-  serverAddress = "http://localhost:8080/trpc"
+  serverAddress: string
 ): ((input: RequestInfo, init?: RequestInit) => AstronauticaClient) => {
   return (input: RequestInfo, init?: RequestInit): AstronauticaClient => {
     return new AstronauticaClient(serverAddress, input, init);
@@ -28,7 +28,7 @@ class AstronauticaClient {
   ) {
     this.client = createTRPCClient<AppRouter>({
       url: serverAddress,
-      fetch: fetch as any // almost compatible with fetch
+      fetch: fetch as any, // almost compatible with fetch
     });
     this.req = new Request(input, init);
     this.preReq = Promise.resolve(this.req.clone());

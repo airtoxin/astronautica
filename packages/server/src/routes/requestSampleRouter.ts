@@ -12,7 +12,6 @@ export const RequestObjectSchema = z.object({
   method: z.string(),
   mode: z.string().nullish(),
   redirect: z.string(),
-  referrer: z.string().nullish(),
   referrerPolicy: z.string().nullish(),
   url: z.string(),
   body: z.string().nullish(),
