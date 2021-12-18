@@ -21,6 +21,7 @@ export const ResponseObjectSchema = z.object({
 });
 
 export const TestRequestSchema = z.object({
+  name: z.string(),
   preRequest: RequestObjectSchema.nullish(),
   preRequestCallback: z.string().nullish(),
   request: RequestObjectSchema,
@@ -45,20 +46,27 @@ export const testRequestRouter = createRouter().mutation("add", {
     }
     const project = ctx.project;
 
-    const result = await prisma.testFile.create({
+    await prisma.testRequest.create({
       data: {
-        projectId: project.id,
-        path: data.path,
-        testRequests: {
-          create: [
-            {
-              preRequest: data.testRequest.preRequest ?? undefined,
-              preRequestCallback: data.testRequest.preRequestCallback,
-              request: data.testRequest.request,
-              response: data.testRequest.response,
-              testCallback: data.testRequest.testCallback,
+        name: data.testRequest.name,
+        preRequest: data.testRequest.preRequest ?? undefined,
+        preRequestCallback: data.testRequest.preRequestCallback,
+        request: data.testRequest.request,
+        response: data.testRequest.response,
+        testCallback: data.testRequest.testCallback,
+        testFile: {
+          connectOrCreate: {
+            where: {
+              path_projectId: {
+                path: data.path,
+                projectId: project.id,
+              },
             },
-          ],
+            create: {
+              path: data.path,
+              projectId: project.id,
+            },
+          },
         },
       },
     });

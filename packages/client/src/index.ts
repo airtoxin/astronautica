@@ -71,6 +71,7 @@ class AstronauticaClient {
       data: {
         path: testState.testPath,
         testRequest: {
+          name: testState.currentTestName,
           preRequest:
             this.preReq == null
               ? undefined
