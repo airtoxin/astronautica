@@ -37,67 +37,84 @@ export const TestAddRequestDataSchema = z.object({
   }),
 });
 
-export const testRequestRouter = createRouter().mutation("add", {
-  input: TestAddRequestDataSchema,
-  resolve: async ({ input, ctx }) => {
-    const data = input.data;
-    if (ctx.project == null) {
-      throw new TRPCError({ code: "UNAUTHORIZED", message: ctx.reason });
-    }
-    const project = ctx.project;
+export const testRequestRouter = createRouter()
+  .query("list", {
+    resolve: async ({ ctx }) => {
+      const project = ctx.project;
+      if (project == null) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: ctx.reason });
+      }
 
-    const testFile = await prisma.testFile.findUnique({
-      select: {
-        id: true,
-      },
-      where: {
-        path_projectId: {
-          path: data.path,
-          projectId: project.id,
+      const testFiles = await prisma.testFile.findMany({
+        include: {
+          testRequests: true,
         },
-      },
-    });
+      });
 
-    await prisma.testRequest.upsert({
-      create: {
-        name: data.testRequest.name,
-        preRequest: data.testRequest.preRequest ?? undefined,
-        preRequestCallback: data.testRequest.preRequestCallback,
-        request: data.testRequest.request,
-        response: data.testRequest.response,
-        testCallback: data.testRequest.testCallback,
-        testFile: {
-          connectOrCreate: {
-            where: {
-              path_projectId: {
+      return testFiles;
+    },
+  })
+  .mutation("add", {
+    input: TestAddRequestDataSchema,
+    resolve: async ({ input, ctx }) => {
+      const data = input.data;
+      if (ctx.project == null) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: ctx.reason });
+      }
+      const project = ctx.project;
+
+      const testFile = await prisma.testFile.findUnique({
+        select: {
+          id: true,
+        },
+        where: {
+          path_projectId: {
+            path: data.path,
+            projectId: project.id,
+          },
+        },
+      });
+
+      await prisma.testRequest.upsert({
+        create: {
+          name: data.testRequest.name,
+          preRequest: data.testRequest.preRequest ?? undefined,
+          preRequestCallback: data.testRequest.preRequestCallback,
+          request: data.testRequest.request,
+          response: data.testRequest.response,
+          testCallback: data.testRequest.testCallback,
+          testFile: {
+            connectOrCreate: {
+              where: {
+                path_projectId: {
+                  path: data.path,
+                  projectId: project.id,
+                },
+              },
+              create: {
                 path: data.path,
                 projectId: project.id,
               },
             },
-            create: {
-              path: data.path,
-              projectId: project.id,
-            },
           },
         },
-      },
-      update: {
-        name: data.testRequest.name,
-        preRequest: data.testRequest.preRequest ?? undefined,
-        preRequestCallback: data.testRequest.preRequestCallback,
-        request: data.testRequest.request,
-        response: data.testRequest.response,
-        testCallback: data.testRequest.testCallback,
-      },
-      where: {
-        name_testFileId: {
+        update: {
           name: data.testRequest.name,
-          // FIXME: dummy id
-          testFileId: testFile?.id ?? "",
+          preRequest: data.testRequest.preRequest ?? undefined,
+          preRequestCallback: data.testRequest.preRequestCallback,
+          request: data.testRequest.request,
+          response: data.testRequest.response,
+          testCallback: data.testRequest.testCallback,
         },
-      },
-    });
+        where: {
+          name_testFileId: {
+            name: data.testRequest.name,
+            // FIXME: dummy id
+            testFileId: testFile?.id ?? "",
+          },
+        },
+      });
 
-    return true;
-  },
-});
+      return true;
+    },
+  });

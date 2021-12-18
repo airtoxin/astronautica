@@ -6,10 +6,15 @@ import { trpc } from "./trpc";
 
 ReactDOM.render(
   createElement(() => {
+    // TODO
+    const apiKey = "";
     const [queryClient] = useState(() => new QueryClient());
     const [trpcClient] = useState(() =>
       trpc.createClient({
         url: "http://localhost:8080/trpc",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
       })
     );
     return (
