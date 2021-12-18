@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "run-p dev:*",
-    "dev:server": "ts-node-dev --respawn src/index.ts",
+    "dev:server": "ts-node-dev --exit-child --respawn src/index.ts",
     "dev:ts": "tsc --watch",
     "test:unit": "jest"
   },
