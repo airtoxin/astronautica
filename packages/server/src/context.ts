@@ -5,8 +5,16 @@ import { Request, Response } from "express";
 import { NodeHTTPCreateContextFn } from "@trpc/server/adapters/node-http";
 
 export type Context =
-  | { readonly reason: string; readonly project?: undefined }
-  | { readonly reason?: undefined; readonly project: Project };
+  | {
+      readonly apiKey?: string;
+      readonly reason: string;
+      readonly project?: undefined;
+    }
+  | {
+      readonly apiKey?: string;
+      readonly reason?: undefined;
+      readonly project: Project;
+    };
 
 export const createContext: NodeHTTPCreateContextFn<
   AnyRouter,
@@ -29,7 +37,7 @@ export const createContext: NodeHTTPCreateContextFn<
       project: true,
     },
   });
-  if (result == null) return { reason: "Invalid API Key" };
+  if (result == null) return { apiKey, reason: "Invalid API Key" };
 
   return {
     project: result.project,
