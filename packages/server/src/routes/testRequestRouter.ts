@@ -40,10 +40,8 @@ export const TestAddRequestDataSchema = z.object({
 export const testRequestRouter = createRouter()
   .query("list", {
     resolve: async ({ ctx }) => {
-      const project = ctx.project;
-      if (project == null) {
+      if (ctx.type === "unauthorized")
         throw new TRPCError({ code: "UNAUTHORIZED", message: ctx.reason });
-      }
 
       const testFiles = await prisma.testFile.findMany({
         include: {
@@ -58,10 +56,14 @@ export const testRequestRouter = createRouter()
     input: TestAddRequestDataSchema,
     resolve: async ({ input, ctx }) => {
       const data = input.data;
-      if (ctx.project == null) {
+      if (ctx.type === "unauthorized")
         throw new TRPCError({ code: "UNAUTHORIZED", message: ctx.reason });
-      }
-      const project = ctx.project;
+      const project =
+        ctx.type === "apiKey"
+          ? ctx.project
+          : (() => {
+              throw new TRPCError({ code: "UNAUTHORIZED" });
+            })();
 
       const testFile = await prisma.testFile.findUnique({
         select: {
