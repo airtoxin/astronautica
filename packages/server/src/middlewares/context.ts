@@ -1,6 +1,6 @@
 import { Account, DashboardSession, Project } from "@prisma/client";
 import { AnyRouter } from "@trpc/server";
-import { prisma } from "./prisma";
+import { prisma } from "../prisma";
 import { Request, Response } from "express";
 import { NodeHTTPCreateContextFn } from "@trpc/server/adapters/node-http";
 import { OAuth2Client } from "google-auth-library";

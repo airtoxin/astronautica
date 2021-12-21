@@ -2,8 +2,8 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import express from "express";
 import cors from "cors";
 import { appRouter } from "./routes";
-import { createContext } from "./context";
-import cookie from "cookie";
+import { createContext } from "./middlewares/context";
+import { responseMeta } from "./middlewares/response";
 
 const app = express();
 app.use(
@@ -18,30 +18,7 @@ app.use(
   createExpressMiddleware({
     router: appRouter,
     createContext,
-    responseMeta: (req) => {
-      if (req.ctx?.type === "loginIdToken") {
-        return {
-          headers: {
-            "Set-Cookie": cookie.serialize(
-              "astro.session",
-              req.ctx.dashboardSession.id,
-              {
-                domain: "localhost",
-                path: "/",
-                sameSite: "lax",
-                secure: true,
-                httpOnly: true,
-              }
-            ),
-          },
-        };
-      }
-      return {
-        headers: {
-          "Set-Cookie": cookie.serialize("key", "value", {}),
-        },
-      };
-    },
+    responseMeta,
   })
 );
 

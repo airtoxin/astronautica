@@ -1,4 +1,4 @@
-import { Context } from "../context";
+import { Context } from "../middlewares/context";
 import { router } from "@trpc/server";
 
 export const createRouter = () => {
