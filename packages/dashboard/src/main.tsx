@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { createTrpcClient, trpc } from "./trpc";
 import { BrowserRouter } from "react-router-dom";
-import { Routes } from "./Routes";
+import { Routes } from "./routes/Routes";
 
 ReactDOM.render(
   createElement(() => {

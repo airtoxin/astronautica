@@ -1,6 +1,6 @@
 import { VoidFunctionComponent } from "react";
 import { GoogleLogin } from "react-google-login";
-import { createTrpcClient } from "./trpc";
+import { createTrpcClient } from "../trpc";
 import { z } from "zod";
 import { useLocation, useNavigate } from "react-router-dom";
 
