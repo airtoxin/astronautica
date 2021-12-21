@@ -26,8 +26,7 @@ export const LoginPage: VoidFunctionComponent = () => {
           .getAuthResponse().id_token;
         await createTrpcClient({ "Id-Token": idToken })
           .mutation("auth.login")
-          .then((account) => {
-            console.log("@account", account);
+          .then(() => {
             navigate(redirectTo, { replace: true });
           });
       }}

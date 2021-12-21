@@ -11,11 +11,6 @@ export const authRouter = createRouter()
     resolve: async ({ ctx }) => {
       if (ctx.auth.type !== "authorizeByGoogleLogin")
         throw new TRPCError({ code: "UNAUTHORIZED" });
-
-      return {
-        accountId: ctx.auth.account.id,
-        name: ctx.auth.account.name,
-        email: ctx.auth.account.email,
-      };
+      return true;
     },
   });

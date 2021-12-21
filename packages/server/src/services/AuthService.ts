@@ -1,6 +1,11 @@
 import { prisma } from "../prisma";
 import { OAuth2Client } from "google-auth-library";
-import { Account, DashboardSession, Project } from "@prisma/client";
+import {
+  Account,
+  DashboardSession,
+  Organization,
+  Project,
+} from "@prisma/client";
 
 const client = new OAuth2Client(process.env.VITE_GOOGLE_LOGIN_CLIENT_ID);
 
@@ -11,14 +16,13 @@ export type UnauthorizedResult = {
 
 export type GoogleLoginAuthorizeResult = {
   readonly type: "authorizeByGoogleLogin";
-  readonly account: Account;
-  readonly dashboardSession: DashboardSession;
 };
 
 export type CookieAuthorizeResult = {
   readonly type: "authorizeByCookie";
   readonly account: Account;
   readonly dashboardSession: DashboardSession;
+  readonly organizations: Organization[];
 };
 
 export type ApiKeyAuthorizeResult = {
@@ -71,8 +75,6 @@ export class AuthService {
     });
     return {
       type: "authorizeByGoogleLogin",
-      dashboardSession: account.dashboardSessions[0]!,
-      account,
     };
   }
 
@@ -83,15 +85,20 @@ export class AuthService {
         id: cookieSessionId,
       },
       include: {
-        account: true,
+        account: {
+          include: {
+            organizations: true,
+          },
+        },
       },
     });
     return dashboardSession == null
       ? { type: "unauthorized", reason: "Account not found" }
       : {
           type: "authorizeByCookie",
-          account: dashboardSession.account,
           dashboardSession,
+          account: dashboardSession.account,
+          organizations: dashboardSession.account.organizations,
         };
   }
 
