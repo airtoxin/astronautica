@@ -1,6 +1,7 @@
 import { inferRouterContext, ResponseMeta } from "@trpc/server";
 import { AppRouter } from "../routes";
 import cookie from "cookie";
+import { COOKIE_SESSION_KEY } from "../constants";
 
 export const responseMeta = ({
   ctx,
@@ -11,7 +12,7 @@ export const responseMeta = ({
     return {
       headers: {
         "Set-Cookie": cookie.serialize(
-          "astro.session",
+          COOKIE_SESSION_KEY,
           ctx.auth.dashboardSession.id,
           {
             domain: "localhost",
