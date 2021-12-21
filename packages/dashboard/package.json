@@ -10,10 +10,12 @@
     "@astronautica/server": "0.0.1",
     "@trpc/client": "9.16.0",
     "@trpc/react": "9.16.0",
+    "history": "5.2.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-google-login": "5.2.2",
     "react-query": "3.34.3",
+    "react-router-dom": "6.2.1",
     "recoil": "0.5.2",
     "zod": "3.11.6"
   },

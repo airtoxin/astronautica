@@ -5,6 +5,6 @@ export const authRouter = createRouter().mutation("login", {
   resolve: async (req) => {
     if (req.ctx.type !== "loginIdToken")
       throw new TRPCError({ code: "UNAUTHORIZED" });
-    return true;
+    return req.ctx.account;
   },
 });
