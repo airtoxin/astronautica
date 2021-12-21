@@ -1,9 +1,10 @@
 import { VoidFunctionComponent } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import { trpc } from "../trpc";
 
 export const LoginRequiredRoutes: VoidFunctionComponent = () => {
-  const authorized = Math.random() < 0.5;
-  if (!authorized) return <Navigate to="/login" />;
+  const { data, isLoading, error } = trpc.useQuery(["auth.session"]);
+  console.log("@data,isLoading,error", data, isLoading, error);
   return (
     <div>
       <h1>LoggedIn</h1>

@@ -7,12 +7,12 @@ export const responseMeta = ({
 }: {
   ctx?: inferRouterContext<AppRouter>;
 }): ResponseMeta => {
-  if (ctx?.type === "loginIdToken") {
+  if (ctx?.auth.type === "authorizeByGoogleLogin") {
     return {
       headers: {
         "Set-Cookie": cookie.serialize(
           "astro.session",
-          ctx.dashboardSession.id,
+          ctx.auth.dashboardSession.id,
           {
             domain: "localhost",
             path: "/",

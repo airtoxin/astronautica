@@ -1,33 +1,13 @@
-import { Account, DashboardSession, Project } from "@prisma/client";
 import { AnyRouter } from "@trpc/server";
-import { prisma } from "../prisma";
 import { Request, Response } from "express";
 import { NodeHTTPCreateContextFn } from "@trpc/server/adapters/node-http";
-import { OAuth2Client } from "google-auth-library";
 import cookie from "cookie";
+import { AuthorizeResult, authService } from "../services/AuthService";
+import { COOKIE_SESSION_KEY } from "../constants";
 
-const client = new OAuth2Client(process.env.VITE_GOOGLE_LOGIN_CLIENT_ID);
-
-export type Context =
-  | {
-      readonly type: "loginIdToken";
-      readonly account: Account;
-      readonly dashboardSession: DashboardSession;
-    }
-  | {
-      readonly type: "cookie";
-      readonly account: Account;
-      readonly dashboardSession: DashboardSession;
-    }
-  | {
-      readonly type: "apiKey";
-      readonly apiKey: string;
-      readonly project: Project;
-    }
-  | {
-      readonly type: "unauthorized";
-      readonly reason: string;
-    };
+export type Context = {
+  auth: AuthorizeResult;
+};
 
 export const createContext: NodeHTTPCreateContextFn<
   AnyRouter,
@@ -36,95 +16,31 @@ export const createContext: NodeHTTPCreateContextFn<
 > = async ({ req }): Promise<Context> => {
   const idToken = req.headers["id-token"];
   if (typeof idToken === "string") {
-    const ticket = await client.verifyIdToken({
-      idToken,
-      audience: process.env.VITE_GOOGLE_LOGIN_CLIENT_ID,
-    });
-    const payload = ticket.getPayload();
-    if (payload == null || payload.email == null || payload.name == null)
-      return {
-        type: "unauthorized",
-        reason: "Google login account requires email and name",
-      };
-    const account = await prisma.account.upsert({
-      create: {
-        email: payload.email,
-        name: payload.name,
-        dashboardSessions: {
-          create: {},
-        },
-      },
-      where: {
-        email: payload.email,
-      },
-      update: {
-        name: payload.name,
-        dashboardSessions: {
-          // TODO: Add salt
-          create: {},
-        },
-      },
-      include: {
-        dashboardSessions: true,
-      },
-    });
-    return {
-      type: "loginIdToken",
-      dashboardSession: account.dashboardSessions[0]!,
-      account,
-    };
+    const auth = await authService.authorizeByGoogleLogin(idToken);
+    if (auth.type !== "unauthorized") return { auth };
   }
 
   const parsedCookie = cookie.parse(req.headers.cookie ?? "");
-  if (typeof parsedCookie["astro.session"] === "string") {
-    const sessionId = parsedCookie["astro.session"];
-    const dashboardSession = await prisma.dashboardSession.findUnique({
-      where: {
-        id: sessionId,
-      },
-      include: {
-        account: true,
-      },
-    });
-    if (dashboardSession == null)
-      return { type: "unauthorized", reason: "Account not found" };
-    return {
-      type: "cookie",
-      account: dashboardSession.account,
-      dashboardSession,
-    };
+  const sessionId = parsedCookie[COOKIE_SESSION_KEY];
+  if (typeof sessionId === "string") {
+    const auth = await authService.authorizeByCookie(sessionId);
+    if (auth.type !== "unauthorized") return { auth };
   }
 
   const authorization = req.headers.authorization;
   if (typeof authorization === "string") {
-    const apiKeyRaw = authorization.split(" ")[1];
-    if (apiKeyRaw == null)
-      return {
-        type: "unauthorized",
-        reason: "Invalid Authorization header format",
-      };
-    const apiKey = await prisma.apiKey.findFirst({
-      where: {
-        id: apiKeyRaw,
-        expiresAt: {
-          gt: new Date(),
-        },
-      },
-      include: {
-        project: true,
-      },
-    });
+    const apiKey = authorization.split(" ")[1];
     if (apiKey == null)
-      return { type: "unauthorized", reason: "Invalid API Key" };
-    return {
-      type: "apiKey",
-      apiKey: apiKey.id,
-      project: apiKey.project,
-    };
+      return {
+        auth: authService.unauthorized("Invalid Authorization header format"),
+      };
+    const auth = await authService.authorizeByCookie(apiKey);
+    if (auth.type !== "unauthorized") return { auth };
   }
 
   return {
-    type: "unauthorized",
-    reason: "Neither id-token nor api-key existed",
+    auth: authService.unauthorized(
+      "Authentication by id-token, cookie, or api-key is required"
+    ),
   };
 };
