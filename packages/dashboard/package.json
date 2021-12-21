@@ -2,7 +2,10 @@
   "name": "@astronautica/dashboard",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "run-p dev:*",
+    "dev:js": "vite",
+    "dev:css": "npx tailwindcss -i ./src/style.css -o ./dist/output.css --watch",
+    "prebuild": "tsc",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
@@ -25,6 +28,10 @@
     "@types/react-dom": "17.0.10",
     "@types/recoil": "0.0.9",
     "@vitejs/plugin-react": "1.0.7",
+    "autoprefixer": "10.4.0",
+    "npm-run-all": "4.1.5",
+    "postcss": "8.4.5",
+    "tailwindcss": "3.0.7",
     "typescript": "4.5.3",
     "vite": "2.7.2"
   }
