@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { createTrpcClient, trpc } from "./trpc";
 import { BrowserRouter } from "react-router-dom";
 import { Routes } from "./routes/Routes";
+import { ReactQueryDevtools } from "react-query/devtools";
 
 ReactDOM.render(
   createElement(() => {
@@ -17,6 +18,7 @@ ReactDOM.render(
             <BrowserRouter>
               <Routes />
             </BrowserRouter>
+            <ReactQueryDevtools position="bottom-right" />
           </QueryClientProvider>
         </trpc.Provider>
       </StrictMode>
