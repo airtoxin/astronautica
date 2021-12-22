@@ -2,33 +2,34 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { addDays } from "date-fns";
 import { createRouter } from "./helper";
+import { TRPCError } from "@trpc/server";
 
-export const projectRouter = createRouter().mutation("init", {
-  input: z.object({
-    projectName: z.string(),
-  }),
-  resolve: async (req) => {
-    const projectName = req.input.projectName;
-    const project = await prisma.project.create({
-      data: {
-        name: projectName,
-        apiKeys: {
-          create: [
-            {
-              status: "ENABLE",
-              description: `API Key for ${projectName}`,
-              expiresAt: addDays(new Date(), 30),
-            },
-          ],
+export const projectRouter = createRouter().query("list", {
+  resolve: async ({ ctx }) => {
+    if (ctx.auth.type !== "authorizeByCookie")
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+
+    const projects = await prisma.project.findMany({
+      where: {
+        organizationId: {
+          in: ctx.auth.organizations.map((o) => o.id),
         },
       },
       include: {
-        apiKeys: true,
+        organization: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
-    const apiKey = project.apiKeys[0];
-    if (apiKey == null) throw new Error(`API Key not created`);
 
-    return apiKey;
+    return {
+      projects: projects.map((project) => ({
+        id: project.id,
+        name: project.name,
+        organizationName: project.organization.name,
+      })),
+    };
   },
 });
