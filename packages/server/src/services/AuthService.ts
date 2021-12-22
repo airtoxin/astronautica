@@ -6,6 +6,7 @@ import {
   Organization,
   Project,
 } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 
 const client = new OAuth2Client(process.env.VITE_GOOGLE_LOGIN_CLIENT_ID);
 
@@ -16,6 +17,9 @@ export type UnauthorizedResult = {
 
 export type GoogleLoginAuthorizeResult = {
   readonly type: "authorizeByGoogleLogin";
+  readonly dashboardSession: DashboardSession;
+  readonly account: Account;
+  readonly organizations: Organization[];
 };
 
 export type CookieAuthorizeResult = {
@@ -70,11 +74,25 @@ export class AuthService {
         },
       },
       include: {
-        dashboardSessions: true,
+        dashboardSessions: {
+          include: {
+            account: {
+              include: {
+                organizations: true,
+              },
+            },
+          },
+        },
       },
     });
+    const dashboardSession = account.dashboardSessions[0];
+    if (dashboardSession == null)
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     return {
       type: "authorizeByGoogleLogin",
+      dashboardSession,
+      account: dashboardSession.account,
+      organizations: dashboardSession.account.organizations,
     };
   }
 
