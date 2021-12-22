@@ -6,6 +6,7 @@ import { createTrpcClient, trpc } from "./trpc";
 import { BrowserRouter } from "react-router-dom";
 import { Routes } from "./routes/Routes";
 import { ReactQueryDevtools } from "react-query/devtools";
+import { RecoilRoot } from "recoil";
 
 ReactDOM.render(
   createElement(() => {
@@ -16,9 +17,11 @@ ReactDOM.render(
       <StrictMode>
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-              <Routes />
-            </BrowserRouter>
+            <RecoilRoot>
+              <BrowserRouter>
+                <Routes />
+              </BrowserRouter>
+            </RecoilRoot>
             <ReactQueryDevtools position="bottom-right" />
           </QueryClientProvider>
         </trpc.Provider>

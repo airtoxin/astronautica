@@ -1,9 +1,17 @@
-import { VoidFunctionComponent } from "react";
+import { useEffect, VoidFunctionComponent } from "react";
 import { trpc } from "../trpc";
 import { OrganizationCard } from "../components/OrganizationCard";
+import { useSetRecoilState } from "recoil";
+import { Breadcrumb } from "../state";
 
 export const RootPage: VoidFunctionComponent = () => {
   const { data } = trpc.useQuery(["organization.list"]);
+
+  const setBreadcrumb = useSetRecoilState(Breadcrumb);
+  useEffect(() => {
+    setBreadcrumb([{ path: "/", name: "Top" }]);
+  }, []);
+
   return (
     <div className="w-full">
       {data &&

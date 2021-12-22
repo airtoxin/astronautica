@@ -6,6 +6,7 @@ import { LoginRequiredRoutes } from "./LoginRequiredRoutes";
 import { AppLayout } from "../components/AppLayout";
 import { ProjectsPage } from "./ProjectsPage";
 import { OrganizationsPage } from "./OrganizationsPage";
+import { OrganizationPage } from "./OrganizationPage";
 
 export const Routes: VoidFunctionComponent = () => (
   <RRoutes>
@@ -13,6 +14,7 @@ export const Routes: VoidFunctionComponent = () => (
     <Route element={<LoginRequiredRoutes />}>
       <Route element={<AppLayout />}>
         <Route path="/organization" element={<OrganizationsPage />} />
+        <Route path="/organization/:id" element={<OrganizationPage />} />
         <Route path="/project" element={<ProjectsPage />} />
         <Route path="*" element={<RootPage />} />
       </Route>

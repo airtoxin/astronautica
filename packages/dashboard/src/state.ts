@@ -1,6 +1,7 @@
 import { atom } from "recoil";
 
-export const AuthToken = atom<string | null>({
-  key: "AuthToken",
-  default: null,
+export type BreadcrumbFragment = { path: string; name: string };
+export const Breadcrumb = atom<BreadcrumbFragment[]>({
+  key: "Breadcrumb",
+  default: [],
 });

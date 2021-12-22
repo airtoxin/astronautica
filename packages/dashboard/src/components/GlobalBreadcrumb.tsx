@@ -1,25 +1,20 @@
 import { VoidFunctionComponent } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import { Breadcrumb } from "../state";
 
 export const GlobalBreadcrumb: VoidFunctionComponent = () => {
-  const location = useLocation();
-  const fragments = location.pathname.split("/");
+  const breadcrumb = useRecoilValue(Breadcrumb);
   return (
     <div className="flex text-bold">
-      <div className="first:ml-0 ml-2">
-        <Link to="/">Top</Link>
-      </div>
-      {fragments.flatMap((fragment, i, all) => {
-        if (fragment === "") return null;
-        return (
-          <>
-            <div className="first:ml-0 ml-2 select-none">/</div>
-            <div className="first:ml-0 ml-2">
-              <Link to={all.slice(0, i + 1).join("/")}>{fragment}</Link>
-            </div>
-          </>
-        );
-      })}
+      {breadcrumb.flatMap(({ name, path }, i) => (
+        <>
+          {i !== 0 && <div className="first:ml-0 ml-2 select-none">/</div>}
+          <div className="first:ml-0 ml-2 underline underline-offset-4 text-gray-500">
+            <Link to={path}>{name}</Link>
+          </div>
+        </>
+      ))}
     </div>
   );
 };

@@ -1,8 +1,10 @@
-import { VoidFunctionComponent } from "react";
+import { useEffect, VoidFunctionComponent } from "react";
 import { GoogleLogin } from "react-google-login";
 import { createTrpcClient, trpc } from "../trpc";
 import { z } from "zod";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useSetRecoilState } from "recoil";
+import { Breadcrumb } from "../state";
 
 export const RedirectState = z.object({
   redirectTo: z.string(),
@@ -14,6 +16,14 @@ export const LoginPage: VoidFunctionComponent = () => {
   const navigate = useNavigate();
   const state = RedirectState.safeParse(location.state);
   const redirectTo = state.success ? state.data.redirectTo : "/";
+
+  const setBreadcrumb = useSetRecoilState(Breadcrumb);
+  useEffect(() => {
+    setBreadcrumb([
+      { path: "/", name: "Top" },
+      { path: "/login", name: "Login" },
+    ]);
+  }, []);
 
   if (data) return <Navigate to={redirectTo} />;
   return (
