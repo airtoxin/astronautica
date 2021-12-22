@@ -10,7 +10,7 @@ export const DefaultAccountIcon: VoidFunctionComponent<{
   return (
     <div
       title={accountName}
-      className="flex justify-center items-center w-8 h-8 rounded-full drop-shadow text-white bg-blend-difference"
+      className="flex justify-center items-center w-8 h-8 rounded-full drop-shadow text-white bg-blend-difference select-none"
       style={{ backgroundColor }}
     >
       {accountName.slice(0, 1)}

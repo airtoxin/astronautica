@@ -10,7 +10,7 @@ export const OrganizationCard: VoidFunctionComponent<{
 }> = ({ organization, accounts }) => {
   return (
     <div
-      className="md:flex border w-full min-h-60 md:min-h-40 bg-white drop-shadow"
+      className="md:flex border w-full min-h-60 md:min-h-40 bg-white drop-shadow hover:drop-shadow-lg active:drop-shadow transition ease-out "
       key={organization.id}
     >
       <div className="w-40 h-40 p-2">
