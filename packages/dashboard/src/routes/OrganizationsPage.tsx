@@ -6,7 +6,6 @@ export const OrganizationsPage: VoidFunctionComponent = () => {
   const { data } = trpc.useQuery(["organization.list"]);
   return (
     <div className="w-full">
-      <h1>Organizations</h1>
       {data &&
         data.organizations.map((organization) => (
           <div key={organization.id} className="first-of-type:mt-0 mt-4">

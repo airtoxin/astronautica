@@ -11,11 +11,9 @@ export const Routes: VoidFunctionComponent = () => (
   <RRoutes>
     <Route path="/login" element={<LoginPage />} />
     <Route element={<LoginRequiredRoutes />}>
-      <Route element={<AppLayout withoutHeader />}>
+      <Route element={<AppLayout />}>
         <Route path="/organization" element={<OrganizationsPage />} />
         <Route path="/project" element={<ProjectsPage />} />
-      </Route>
-      <Route element={<AppLayout />}>
         <Route path="*" element={<RootPage />} />
       </Route>
     </Route>
