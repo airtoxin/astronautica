@@ -15,6 +15,7 @@ model Account {
   organizations     Organization[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
+  ApiKey            ApiKey[]
 }
 
 model DashboardSession {
@@ -48,12 +49,14 @@ model ApiKey {
   id          String       @id @default(uuid())
   status      ApiKeyStatus
   description String?
+  createdBy   Account      @relation(fields: [accountId], references: [id])
   expiresAt   DateTime?
   lastUsedAt  DateTime?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   project     Project      @relation(fields: [projectId], references: [id])
   projectId   String
+  accountId   String
 }
 
 enum ApiKeyStatus {
