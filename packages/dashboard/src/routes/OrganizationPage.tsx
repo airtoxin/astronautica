@@ -19,5 +19,22 @@ export const OrganizationPage: VoidFunctionComponent = () => {
     }
   }, [data]);
 
-  return <div className="w-full">yay</div>;
+  return (
+    <div className="w-full">
+      <table>
+        <tr>
+          <th>Status</th>
+          <th>API Key</th>
+          <th>Last used</th>
+          <th>Created by</th>
+        </tr>
+        <tr>
+          <td>Active</td>
+          <td>aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa</td>
+          <td>Last 2 min.</td>
+          <td>えあんぬ</td>
+        </tr>
+      </table>
+    </div>
+  );
 };
