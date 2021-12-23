@@ -3,6 +3,8 @@ import { useSetRecoilState } from "recoil";
 import { Breadcrumb } from "../state";
 import { useParams } from "react-router-dom";
 import { trpc } from "../trpc";
+import { Table, Tag, Space, Button } from "antd";
+import Column from "antd/lib/table/Column";
 
 export const OrganizationPage: VoidFunctionComponent = () => {
   const { id } = useParams();
@@ -21,20 +23,13 @@ export const OrganizationPage: VoidFunctionComponent = () => {
 
   return (
     <div className="w-full">
-      <table>
-        <tr>
-          <th>Status</th>
-          <th>API Key</th>
-          <th>Last used</th>
-          <th>Created by</th>
-        </tr>
-        <tr>
-          <td>Active</td>
-          <td>aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa</td>
-          <td>Last 2 min.</td>
-          <td>えあんぬ</td>
-        </tr>
-      </table>
+      <Button type="primary">ボタン</Button>
+      <Table dataSource={[]}>
+        <Column title="Status" dataIndex="status" key="status" />
+        <Column title="API Key" dataIndex="api-key" key="api-key" />
+        <Column title="Last used" dataIndex="last-used" key="last-used" />
+        <Column title="Created by" dataIndex="created-by" key="created-by" />
+      </Table>
     </div>
   );
 };
