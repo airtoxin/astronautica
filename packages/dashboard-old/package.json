@@ -1,0 +1,34 @@
+{
+  "name": "@astronautica/dashboard-old",
+  "version": "0.0.0",
+  "scripts": {
+  },
+  "dependencies": {
+    "@astronautica/server": "0.0.1",
+    "@trpc/client": "9.16.0",
+    "@trpc/react": "9.16.0",
+    "antd": "4.17.4",
+    "history": "5.2.0",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-google-login": "5.2.2",
+    "react-query": "3.34.3",
+    "react-router-dom": "6.2.1",
+    "recoil": "0.5.2",
+    "zod": "3.11.6"
+  },
+  "devDependencies": {
+    "@types/gapi.auth2": "0.0.55",
+    "@types/react": "17.0.33",
+    "@types/react-dom": "17.0.10",
+    "@types/recoil": "0.0.9",
+    "@vitejs/plugin-react": "1.0.7",
+    "autoprefixer": "10.4.0",
+    "less": "4.1.2",
+    "npm-run-all": "4.1.5",
+    "postcss": "8.4.5",
+    "tailwindcss": "3.0.7",
+    "typescript": "4.5.3",
+    "vite": "2.7.2"
+  }
+}
