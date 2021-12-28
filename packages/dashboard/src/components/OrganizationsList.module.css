@@ -1,0 +1,6 @@
+.listItem {
+  border-bottom: 1px solid #f0f0f0;
+}
+.listItem:last-child {
+  border-bottom: none;
+}

@@ -1,10 +1,16 @@
 import { useEffect, VoidFunctionComponent } from "react";
 import { useSetRecoilState } from "recoil";
 import { Breadcrumb } from "../state";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { trpc } from "../trpc";
-import { Table, Tag, Space, Button } from "antd";
-import Column from "antd/lib/table/Column";
+import { Table } from "antd";
+
+type Project = {
+  id: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export const OrganizationPage: VoidFunctionComponent = () => {
   const { id } = useParams();
@@ -21,15 +27,27 @@ export const OrganizationPage: VoidFunctionComponent = () => {
     }
   }, [data]);
 
+  if (data == null) return null;
   return (
-    <div className="w-full">
-      <Button type="primary">ボタン</Button>
-      <Table dataSource={[]}>
-        <Column title="Status" dataIndex="status" key="status" />
-        <Column title="API Key" dataIndex="api-key" key="api-key" />
-        <Column title="Last used" dataIndex="last-used" key="last-used" />
-        <Column title="Created by" dataIndex="created-by" key="created-by" />
-      </Table>
-    </div>
+    <Table<Project> dataSource={data.projects} pagination={false} rowKey="id">
+      <Table.Column<Project>
+        title="Project"
+        dataIndex="name"
+        key="name"
+        render={(name, row) => (
+          <Link to={`/organization/${id}/project/${row.id}`}>{name}</Link>
+        )}
+      />
+      <Table.Column<Project>
+        title="Created"
+        dataIndex="createdAt"
+        key="createdAt"
+      />
+      <Table.Column<Project>
+        title="Updated"
+        dataIndex="updatedAt"
+        key="updatedAt"
+      />
+    </Table>
   );
 };

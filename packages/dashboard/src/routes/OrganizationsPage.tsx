@@ -1,8 +1,8 @@
 import { useEffect, VoidFunctionComponent } from "react";
 import { trpc } from "../trpc";
-import { OrganizationCard } from "../components/OrganizationCard";
 import { useSetRecoilState } from "recoil";
 import { Breadcrumb } from "../state";
+import { OrganizationsList } from "../components/OrganizationsList";
 
 export const OrganizationsPage: VoidFunctionComponent = () => {
   const { data } = trpc.useQuery(["organization.list"]);
@@ -17,15 +17,7 @@ export const OrganizationsPage: VoidFunctionComponent = () => {
 
   return (
     <div className="w-full">
-      {data &&
-        data.organizations.map((organization) => (
-          <div key={organization.id} className="first-of-type:mt-0 mt-4">
-            <OrganizationCard
-              organization={organization}
-              accounts={organization.accounts}
-            />
-          </div>
-        ))}
+      {data && <OrganizationsList organizations={data.organizations} />}
     </div>
   );
 };

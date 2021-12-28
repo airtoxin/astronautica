@@ -15,11 +15,20 @@ export const organizationRouter = createRouter()
         where: {
           id: input.organizationId,
         },
+        include: {
+          projects: true,
+        },
       });
       if (organization == null) throw new TRPCError({ code: "NOT_FOUND" });
       return {
         id: organization.id,
         name: organization.name,
+        projects: organization.projects.map((project) => ({
+          id: project.id,
+          name: project.name,
+          createdAt: project.createdAt,
+          updatedAt: project.updatedAt,
+        })),
       };
     },
   })
