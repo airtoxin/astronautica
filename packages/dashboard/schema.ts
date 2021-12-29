@@ -5,8 +5,8 @@ export const typeDefs = gql`
     id: ID!
     email: String!
     name: String!
-    createdAt(format: String!): String!
-    updatedAt(format: String!): String!
+    createdAt: String!
+    updatedAt: String!
     organizations: [Organization!]!
   }
 
@@ -20,8 +20,8 @@ export const typeDefs = gql`
   type Project {
     id: ID!
     name: String!
-    createdAt(format: String!): String!
-    updatedAt(format: String!): String!
+    createdAt: String!
+    updatedAt: String!
     apiKeys: [ApiKey!]!
     testFiles: [TestFile!]!
   }
@@ -35,17 +35,17 @@ export const typeDefs = gql`
     id: ID!
     status: ApiKeyStatus!
     description: String
-    expiresAt(format: String!): String!
-    lastUsedAt(format: String!): String!
-    createdAt(format: String!): String!
-    updatedAt(format: String!): String!
+    expiresAt: String!
+    lastUsedAt: String!
+    createdAt: String!
+    updatedAt: String!
   }
 
   type TestFile {
     id: ID!
     path: String!
-    createdAt(format: String!): String!
-    updatedAt(format: String!): String!
+    createdAt: String!
+    updatedAt: String!
     testRequests: [TestRequest!]!
   }
 
@@ -57,8 +57,8 @@ export const typeDefs = gql`
     request: String!
     response: String!
     testCallback: String
-    createdAt(format: String!): String!
-    updatedAt(format: String!): String!
+    createdAt: String!
+    updatedAt: String!
   }
 
   type Query {

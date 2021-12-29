@@ -1,5 +1,1 @@
-import { prisma } from "../prisma";
-
-export const dataSources = () => ({
-  prisma,
-});
+export const dataSources = () => ({});
