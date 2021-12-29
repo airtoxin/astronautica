@@ -1,5 +1,5 @@
 import { ApolloServer } from "apollo-server-micro";
-import { typeDefs } from "../../../schema";
+import { typeDefs } from "../../schema";
 import { dataSources } from "../../datasources";
 import { context } from "../../context";
 import { resolvers } from "../../resolvers";

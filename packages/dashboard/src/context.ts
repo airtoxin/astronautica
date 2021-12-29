@@ -10,28 +10,28 @@ import { COOKIE_SESSION_KEY } from "./constants";
 import { authService } from "./services/AuthService";
 import cookie from "cookie";
 import { prisma } from "./prisma";
+import { ServerResponse } from "http";
 
 export type Context = {
   auth: AuthorizeResult;
   prisma: typeof prisma;
+  res: ServerResponse;
 };
 
 export const context = async ({
   req,
+  res,
 }: {
   req: MicroRequest;
+  res: ServerResponse;
 }): Promise<Context> => {
-  const idToken = req.headers["id-token"];
-  if (typeof idToken === "string") {
-    const auth = await authService.authorizeByGoogleLogin(idToken);
-    if (auth.type !== "unauthorized") return { auth, prisma };
-  }
+  // ログイン処理 (authorizeByGoogleLogin によるセッション作成) は login Mutation で処理されている
 
   const parsedCookie = cookie.parse(req.headers.cookie ?? "");
   const sessionId = parsedCookie[COOKIE_SESSION_KEY];
   if (typeof sessionId === "string") {
     const auth = await authService.authorizeByCookie(sessionId);
-    if (auth.type !== "unauthorized") return { auth, prisma };
+    if (auth.type !== "unauthorized") return { auth, prisma, res };
   }
 
   const authorization = req.headers.authorization;
@@ -41,9 +41,10 @@ export const context = async ({
       return {
         auth: authService.unauthorized("Invalid Authorization header format"),
         prisma,
+        res,
       };
     const auth = await authService.authorizeByCookie(apiKey);
-    if (auth.type !== "unauthorized") return { auth, prisma };
+    if (auth.type !== "unauthorized") return { auth, prisma, res };
   }
 
   return {
@@ -51,6 +52,7 @@ export const context = async ({
       "Authentication by id-token, cookie, or api-key is required"
     ),
     prisma,
+    res,
   };
 };
 

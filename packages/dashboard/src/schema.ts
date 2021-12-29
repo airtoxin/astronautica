@@ -64,4 +64,8 @@ export const typeDefs = gql`
   type Query {
     viewer: Account!
   }
+
+  type Mutation {
+    login(idToken: String!): Boolean
+  }
 `;

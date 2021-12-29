@@ -68,7 +68,6 @@ export class AuthService {
       update: {
         name: payload.name,
         dashboardSessions: {
-          // TODO: Add salt
           create: {},
         },
       },
@@ -99,7 +98,6 @@ export class AuthService {
   async authorizeByCookie(cookieSessionId: string): Promise<AuthorizeResult> {
     const dashboardSession = await prisma.dashboardSession.findUnique({
       where: {
-        // TODO: salt
         id: cookieSessionId,
       },
       include: {

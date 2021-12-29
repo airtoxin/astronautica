@@ -1,4 +1,4 @@
-schema: ./schema.ts
+schema: ./src/schema.ts
 documents:
   - ./src/**/*.tsx
 generates:
