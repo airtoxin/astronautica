@@ -2,6 +2,15 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
+import { gql } from "apollo-server-micro";
+
+gql`
+  query Home {
+    viewer {
+      name
+    }
+  }
+`;
 
 const Home: NextPage = () => {
   return (

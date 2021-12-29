@@ -1,6 +1,5 @@
 {
-  "name": "@astronautica/server",
-  "version": "0.0.1",
+  "name": "server-old",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",

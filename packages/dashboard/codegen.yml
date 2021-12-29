@@ -1,0 +1,17 @@
+schema: ./schema.ts
+documents:
+  - ./src/**/*.tsx
+generates:
+  ./src/graphql-types.gen.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-react-apollo
+      - typescript-resolvers
+    config:
+      reactApolloVersion: 3
+      apolloReactHooksImportFrom: "@apollo/client"
+      withHOC: false
+      withComponent: false
+      withHooks: true
+      contextType: "./context#GraphqlContextType"

@@ -1,6 +1,5 @@
 {
-  "name": "@astronautica/dashboard-old",
-  "version": "0.0.0",
+  "name": "dashboard-old",
   "scripts": {
   },
   "dependencies": {

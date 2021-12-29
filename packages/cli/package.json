@@ -1,6 +1,5 @@
 {
-  "name": "@astronautica/cli",
-  "version": "0.0.1",
+  "name": "cli",
   "scripts": {
     "start": "ts-node src/index.ts",
     "build": "tsc"
