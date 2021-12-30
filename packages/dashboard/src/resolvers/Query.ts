@@ -13,7 +13,7 @@ export const Query: Required<QueryResolvers> = {
   organization: (parent, args, context) => {
     if (context.auth.type !== "authorizeByCookie")
       throw new AuthenticationError(`Unauthorized`);
-    if (context.auth.organizations.some((o) => o.id === args.organizationId))
+    if (!context.auth.organizations.find((o) => o.id === args.organizationId))
       throw new ForbiddenError(
         `Organization for id:${args.organizationId} not found`
       );

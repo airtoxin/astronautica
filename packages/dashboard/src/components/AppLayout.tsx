@@ -1,5 +1,5 @@
 import { FunctionComponent } from "react";
-import { Menu, Layout } from "antd";
+import { Menu, Layout, Divider } from "antd";
 import { GlobalBreadcrumb } from "./GlobalBreadcrumb";
 
 export const AppLayout: FunctionComponent = ({ children }) => {
@@ -18,10 +18,11 @@ export const AppLayout: FunctionComponent = ({ children }) => {
         </Menu>
       </Layout.Sider>
       <Layout style={{ backgroundColor: "white" }}>
-        <Layout.Header style={{ position: "sticky", top: 0 }}>
+        <Layout.Content style={{ padding: "1rem 1rem 0" }}>
           <GlobalBreadcrumb />
-        </Layout.Header>
-        <Layout.Content style={{ padding: "1rem" }}>{children}</Layout.Content>
+          <Divider />
+          {children}
+        </Layout.Content>
       </Layout>
     </Layout>
   );

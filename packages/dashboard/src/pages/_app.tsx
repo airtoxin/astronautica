@@ -7,6 +7,7 @@ import { initializeApolloClient } from "../apollo";
 import { WithLogin } from "../components/WithLogin";
 import { AppLayout } from "../components/AppLayout";
 import { RecoilRoot } from "recoil";
+import Head from "next/head";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const apolloClient = useMemo(
@@ -16,6 +17,11 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <RecoilRoot>
       <ApolloProvider client={apolloClient}>
+        <Head>
+          <title>Astronautica</title>
+          <meta name="description" content="Astronautica dashboard" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
         <WithLogin>
           <AppLayout>
             <Component {...pageProps} />

@@ -1,4 +1,4 @@
-import { VoidFunctionComponent } from "react";
+import { useEffect, VoidFunctionComponent } from "react";
 import { Table } from "antd";
 import { gql } from "@apollo/client";
 import {
@@ -7,9 +7,20 @@ import {
 } from "../../graphql-types.gen";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useSetRecoilState } from "recoil";
+import { Breadcrumb, BreadcrumbFragment } from "../../state";
 
 gql`
   query OrganizationIdPage($organizationId: String!) {
+    viewer {
+      organizations {
+        id
+        name
+      }
+    }
+    organization(organizationId: $organizationId) {
+      name
+    }
     projects(organizationId: $organizationId) {
       id
       name
@@ -27,6 +38,28 @@ export const OrganizationIdPage: VoidFunctionComponent = () => {
   const { data } = useOrganizationIdPageQuery({
     variables: { organizationId },
   });
+  const setBreadcrumb = useSetRecoilState(Breadcrumb);
+  useEffect(() => {
+    setBreadcrumb(
+      [
+        { name: "Home", path: "/" },
+        { name: "Organization", path: "/organization" },
+      ].concat(
+        data != null
+          ? [
+              {
+                name: data.organization.name,
+                path: `/organization/${organizationId}`,
+                options: data.viewer.organizations.map((o) => ({
+                  name: o.name,
+                  path: `/organization/${o.id}`,
+                })),
+              } as BreadcrumbFragment,
+            ]
+          : []
+      )
+    );
+  }, [data]);
 
   if (data == null) return null;
   return (
