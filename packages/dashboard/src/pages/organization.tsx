@@ -2,18 +2,18 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { OrganizationsList } from "../components/OrganizationsList";
 import { gql } from "@apollo/client";
-import { useHomePageQuery } from "../graphql-types.gen";
+import { useOrganizationPageQuery } from "../graphql-types.gen";
 
 gql`
-  query HomePage {
+  query OrganizationPage {
     organizations {
       ...OrganizationsList
     }
   }
 `;
 
-const HomePage: NextPage = () => {
-  const { data } = useHomePageQuery();
+const OrganizationPage: NextPage = () => {
+  const { data } = useOrganizationPageQuery();
 
   if (data == null) return null;
   return (
@@ -28,4 +28,4 @@ const HomePage: NextPage = () => {
   );
 };
 
-export default HomePage;
+export default OrganizationPage;

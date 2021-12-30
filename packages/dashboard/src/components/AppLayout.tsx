@@ -21,7 +21,7 @@ export const AppLayout: FunctionComponent = ({ children }) => {
         <Layout.Header style={{ position: "sticky", top: 0 }}>
           <GlobalBreadcrumb />
         </Layout.Header>
-        <Layout.Content>{children}</Layout.Content>
+        <Layout.Content style={{ padding: "1rem" }}>{children}</Layout.Content>
       </Layout>
     </Layout>
   );

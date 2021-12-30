@@ -4,7 +4,7 @@ import { AuthenticationError } from "apollo-server-micro";
 import { COOKIE_SESSION_KEY } from "../constants";
 import cookie from "cookie";
 
-export const Mutation: MutationResolvers = {
+export const Mutation: Required<MutationResolvers> = {
   login: async (parent, args, context) => {
     const idToken = args.idToken;
     const auth = await authService.authorizeByGoogleLogin(idToken);

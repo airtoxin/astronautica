@@ -63,6 +63,10 @@ export const typeDefs = gql`
 
   type Query {
     viewer: Account!
+    organization(organizationId: String!): Organization!
+    organizations: [Organization!]!
+    project(projectId: String!): Project!
+    projects(organizationId: String): [Project!]!
   }
 
   type Mutation {
