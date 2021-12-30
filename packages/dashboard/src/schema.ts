@@ -24,6 +24,7 @@ export const typeDefs = gql`
     updatedAt: String!
     apiKeys: [ApiKey!]!
     testFiles: [TestFile!]!
+    organization: Organization!
   }
 
   enum ApiKeyStatus {

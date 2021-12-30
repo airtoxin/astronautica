@@ -1,6 +1,7 @@
 import { FunctionComponent } from "react";
 import { Menu, Layout, Divider } from "antd";
 import { GlobalBreadcrumb } from "./GlobalBreadcrumb";
+import Link from "next/link";
 
 export const AppLayout: FunctionComponent = ({ children }) => {
   return (
@@ -13,8 +14,12 @@ export const AppLayout: FunctionComponent = ({ children }) => {
           Astronautica
         </div>
         <Menu mode="inline" theme="dark">
-          <Menu.Item key="1">Option 1</Menu.Item>
-          <Menu.Item key="2">Option 2</Menu.Item>
+          <Menu.Item key="organization">
+            <Link href="/organization">Organization</Link>
+          </Menu.Item>
+          <Menu.Item key="project">
+            <Link href="/project">Project</Link>
+          </Menu.Item>
         </Menu>
       </Layout.Sider>
       <Layout style={{ backgroundColor: "white" }}>

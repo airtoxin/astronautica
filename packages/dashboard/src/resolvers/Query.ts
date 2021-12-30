@@ -37,7 +37,7 @@ export const Query: Required<QueryResolvers> = {
     });
     if (project == null)
       throw new ForbiddenError(`Project for id:${args.projectId} not found`);
-    return emptyProject(args.projectId);
+    return emptyProject(args.projectId, project.organizationId);
   },
   projects: async (parent, args, context) => {
     if (context.auth.type !== "authorizeByCookie")
@@ -50,6 +50,7 @@ export const Query: Required<QueryResolvers> = {
     const projects = await context.prisma.project.findMany({
       select: {
         id: true,
+        organizationId: true,
       },
       where: {
         organizationId:
@@ -60,6 +61,8 @@ export const Query: Required<QueryResolvers> = {
             : args.organizationId,
       },
     });
-    return projects.map(({ id }) => emptyProject(id));
+    return projects.map(({ id, organizationId }) =>
+      emptyProject(id, organizationId)
+    );
   },
 };
