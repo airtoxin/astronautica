@@ -27,14 +27,12 @@ const OrganizationPage: NextPage = () => {
 
   if (data == null) return null;
   return (
-    <div>
+    <>
       <Head>
-        <title>Astronautica</title>
-        <meta name="description" content="Astronautica dashboard" />
-        <link rel="icon" href="/favicon.ico" />
+        <title>Organization | Astronautica</title>
       </Head>
       <OrganizationsList organizations={data.organizations} />
-    </div>
+    </>
   );
 };
 

@@ -23,7 +23,14 @@ const HomePage: NextPage = () => {
   }, []);
 
   if (data == null) return null;
-  return <OrganizationsList organizations={data.organizations} />;
+  return (
+    <>
+      <Head>
+        <title>Astronautica</title>
+      </Head>
+      <OrganizationsList organizations={data.organizations} />
+    </>
+  );
 };
 
 export default HomePage;

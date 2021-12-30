@@ -1,4 +1,4 @@
-import { useEffect, VoidFunctionComponent } from "react";
+import { useEffect } from "react";
 import { Table } from "antd";
 import { gql } from "@apollo/client";
 import {
@@ -9,6 +9,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSetRecoilState } from "recoil";
 import { Breadcrumb, BreadcrumbFragment } from "../../state";
+import { NextPage } from "next";
+import Head from "next/head";
 
 gql`
   query OrganizationIdPage($organizationId: String!) {
@@ -32,7 +34,7 @@ gql`
 
 type Project = OrganizationIdPageQuery["projects"][number];
 
-export const OrganizationIdPage: VoidFunctionComponent = () => {
+export const OrganizationIdPage: NextPage = () => {
   const router = useRouter();
   const organizationId = [router.query.organizationId].flat()[0] ?? "";
   const { data } = useOrganizationIdPageQuery({
@@ -63,31 +65,36 @@ export const OrganizationIdPage: VoidFunctionComponent = () => {
 
   if (data == null) return null;
   return (
-    <Table<Project> dataSource={data.projects} pagination={false} rowKey="id">
-      <Table.Column<Project>
-        title="Project"
-        dataIndex="name"
-        key="name"
-        render={(name, row) => (
-          <Link
-            href={`/organization/${organizationId}/project/${row.id}`}
-            passHref
-          >
-            <a>{name}</a>
-          </Link>
-        )}
-      />
-      <Table.Column<Project>
-        title="Created"
-        dataIndex="createdAt"
-        key="createdAt"
-      />
-      <Table.Column<Project>
-        title="Updated"
-        dataIndex="updatedAt"
-        key="updatedAt"
-      />
-    </Table>
+    <>
+      <Head>
+        <title>{data.organization.name} | Astronautica</title>
+      </Head>
+      <Table<Project> dataSource={data.projects} pagination={false} rowKey="id">
+        <Table.Column<Project>
+          title="Project"
+          dataIndex="name"
+          key="name"
+          render={(name, row) => (
+            <Link
+              href={`/organization/${organizationId}/project/${row.id}`}
+              passHref
+            >
+              <a>{name}</a>
+            </Link>
+          )}
+        />
+        <Table.Column<Project>
+          title="Created"
+          dataIndex="createdAt"
+          key="createdAt"
+        />
+        <Table.Column<Project>
+          title="Updated"
+          dataIndex="updatedAt"
+          key="updatedAt"
+        />
+      </Table>
+    </>
   );
 };
 
