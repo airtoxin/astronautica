@@ -1,12 +1,34 @@
 import { fetch, Request, RequestInfo, RequestInit, Response } from "undici";
 import { format } from "prettier";
-import { AppRouter } from "@astronautica/server/dist/routes";
-import { createTRPCClient, TRPCClient } from "@trpc/client";
+import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
 import {
-  RequestObject,
-  ResponseObject,
-  TestAddRequestData,
-} from "@astronautica/server/dist/routes/testRequestRouter";
+  AddTestRequestMutationVariables,
+  TestRequest,
+} from "./graphql-types.gen";
+
+const AddTestRequestMutation = gql`
+  mutation AddTestRequest(
+    $testFilePath: String!
+    $requestName: String!
+    $preRequest: String
+    $preRequestCallback: String
+    $request: String!
+    $response: String!
+    $testCallback: String
+  ) {
+    addTestRequest(
+      testFilePath: $testFilePath
+      requestName: $requestName
+      preRequest: $preRequest
+      preRequestCallback: $preRequestCallback
+      request: $request
+      response: $response
+      testCallback: $testCallback
+    ) {
+      id
+    }
+  }
+`;
 
 export const createRequester = (
   serverAddress: string,
@@ -18,7 +40,7 @@ export const createRequester = (
 };
 
 class AstronauticaClient {
-  private readonly client: TRPCClient<AppRouter>;
+  private readonly client: ApolloClient<any>;
   private readonly req: Request;
   private preReq: Promise<Request> | undefined;
   private preReqCallback:
@@ -33,12 +55,9 @@ class AstronauticaClient {
     apiKey?: string
   ) {
     const apiKeyDefined = apiKey ?? readApiKeyFromEnv();
-    this.client = createTRPCClient<AppRouter>({
-      url: serverAddress,
-      fetch: fetch as any, // almost compatible with fetch
-      headers: {
-        Authorization: `Bearer ${apiKeyDefined}`,
-      },
+    this.client = new ApolloClient({
+      uri: "http://localhost:3000/api/graphql",
+      cache: new InMemoryCache(),
     });
     this.req = new Request(input, init);
   }
@@ -57,31 +76,25 @@ class AstronauticaClient {
   async run(): Promise<Response> {
     return fetch(this.input, this.init).then(async (res) => {
       await this.testCallback?.(res.clone());
-      await this.client.mutation(
-        "testRequest.add",
-        await this.serialize(res.clone())
-      );
+      await this.client.mutate<TestRequest, AddTestRequestMutationVariables>({
+        mutation: AddTestRequestMutation,
+        variables: await this.serialize(res.clone()),
+      });
       return res;
     });
   }
 
-  async serialize(res: Response): Promise<TestAddRequestData> {
+  async serialize(res: Response): Promise<AddTestRequestMutationVariables> {
     const testState = expect.getState();
     return {
-      data: {
-        path: testState.testPath,
-        testRequest: {
-          name: testState.currentTestName,
-          preRequest:
-            this.preReq == null
-              ? undefined
-              : serializeRequest(await this.preReq),
-          preRequestCallback: serializeCallback(this.preReqCallback),
-          request: serializeRequest(this.req),
-          response: await serializeResponse(res),
-          testCallback: serializeCallback(this.testCallback),
-        },
-      },
+      testFilePath: testState.testPath,
+      requestName: testState.currentTestName,
+      preRequest:
+        this.preReq == null ? undefined : serializeRequest(await this.preReq),
+      preRequestCallback: serializeCallback(this.preReqCallback),
+      request: serializeRequest(this.req),
+      response: await serializeResponse(res),
+      testCallback: serializeCallback(this.testCallback),
     };
   }
 }
@@ -93,30 +106,34 @@ const readApiKeyFromEnv = (): string => {
   throw new Error(`API Key not found.`);
 };
 
-const serializeRequest = (req: Request): RequestObject => ({
-  method: req.method,
-  url: req.url,
-  headers: serializeHeaders(req.headers),
-  body: req.body == null ? undefined : JSON.stringify(req.body),
-});
+const serializeRequest = (req: Request): string =>
+  JSON.stringify({
+    method: req.method,
+    url: req.url,
+    headers: serializeHeaders(req.headers),
+    body: req.body == null ? undefined : JSON.stringify(req.body),
+  });
 
-const serializeResponse = async (res: Response): Promise<ResponseObject> => ({
-  url: res.url,
-  status: res.status,
-  body: await res.text(),
-  headers: serializeHeaders(res.headers),
-  redirected: res.redirected,
-});
+const serializeResponse = async (res: Response): Promise<string> =>
+  JSON.stringify({
+    url: res.url,
+    status: res.status,
+    body: await res.text(),
+    headers: serializeHeaders(res.headers),
+    redirected: res.redirected,
+  });
 
-const serializeHeaders = (headers: Headers) => {
+const serializeHeaders = (headers: Headers): string => {
   const h: { [key: string]: string } = {};
   headers.forEach((v, k) => {
     h[k] = v;
   });
-  return h;
+  return JSON.stringify(h);
 };
 
-const serializeCallback = (callback: ((...args: any[]) => any) | undefined) =>
+const serializeCallback = (
+  callback: ((...args: any[]) => any) | undefined
+): string | undefined =>
   callback == null
     ? undefined
     : format(callback.toString(), { parser: "babel" });

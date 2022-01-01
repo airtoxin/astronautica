@@ -78,5 +78,14 @@ export const typeDefs = gql`
       apiKeyDescription: String
       apiKeyExpiration: String
     ): Project!
+    addTestRequest(
+      testFilePath: String!
+      requestName: String!
+      preRequest: String
+      preRequestCallback: String
+      request: String!
+      response: String!
+      testCallback: String
+    ): TestRequest!
   }
 `;

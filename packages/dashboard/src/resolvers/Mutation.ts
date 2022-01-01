@@ -77,4 +77,12 @@ export const Mutation: Required<MutationResolvers> = {
     });
     return emptyProject(id, organizationId);
   },
+  addTestRequest: async (parent, args, context) => {
+    if (context.auth.type !== "authorizeByApiKey")
+      throw new AuthenticationError(`Unauthorized`);
+    await context.prisma.testRequest.update({
+      data: {},
+      where: {},
+    });
+  },
 };
