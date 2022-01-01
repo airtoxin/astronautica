@@ -60,27 +60,20 @@ describe("request", () => {
     ]);
   });
 
-  it("Astronautica サーバーにリクエストを送信していること", async () => {
+  it.only("Astronautica サーバーにリクエストを送信していること", async () => {
     astronauticaCallbackRef.callback = (req, res) => {
       expect(req.body).toMatchObject({
-        0: {
-          requestSample: expect.any(Object),
-        },
+        operationName: "AddTestRequest",
+        request: `{"method":"GET","url":"https://example.com/","headers":"{}"}`,
       });
+      res.setHeader("Content-Type", "application/json");
       res.send({
-        id: null,
-        result: {
-          type: "data",
-          data: {
-            id: "1",
-            title: "Hello tRPC",
-            body: "...",
-          },
-        },
+        data: null,
+        error: [{ message: "error" }],
       });
     };
 
-    const request = createRequester("http://localhost:1234");
+    const request = createRequester("http://localhost:1234", "dummyApiKey");
     await request("https://example.com").run();
 
     expect.assertions(1);

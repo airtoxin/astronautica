@@ -1,3 +1,4 @@
+import "./fetch-polyfill";
 import { fetch, Request, RequestInfo, RequestInit, Response } from "undici";
 import { format } from "prettier";
 import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
@@ -56,8 +57,11 @@ class AstronauticaClient {
   ) {
     const apiKeyDefined = apiKey ?? readApiKeyFromEnv();
     this.client = new ApolloClient({
-      uri: "http://localhost:3000/api/graphql",
+      uri: serverAddress,
       cache: new InMemoryCache(),
+      headers: {
+        Authorization: `Bearer ${apiKeyDefined}`,
+      },
     });
     this.req = new Request(input, init);
   }

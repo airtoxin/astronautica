@@ -1,0 +1,13 @@
+diff --git a/node_modules/apollo-server-micro/dist/microApollo.js b/node_modules/apollo-server-micro/dist/microApollo.js
+index 0fb7a0c..185f061 100644
+--- a/node_modules/apollo-server-micro/dist/microApollo.js
++++ b/node_modules/apollo-server-micro/dist/microApollo.js
+@@ -28,7 +28,7 @@ function graphqlMicro(options) {
+                     req.headers['content-length'] &&
+                     req.headers['content-length'] !== '0' &&
+                     type_is_1.default.is(contentType, 'application/json') &&
+-                    (await (0, micro_1.json)(req)))
++                    (await (0, micro_1.json)(req, { limit: "100mb" })))
+             : url_1.default.parse(req.url, true).query;
+         try {
+             const { graphqlResponse, responseInit } = await (0, apollo_server_core_1.runHttpQuery)([req, res], {

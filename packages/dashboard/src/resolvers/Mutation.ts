@@ -4,6 +4,7 @@ import { AuthenticationError, ForbiddenError } from "apollo-server-micro";
 import { COOKIE_SESSION_KEY } from "../constants";
 import cookie from "cookie";
 import { emptyProject } from "./Project";
+import { emptyTestRequest } from "./TestRequest";
 
 export const Mutation: Required<MutationResolvers> = {
   login: async (parent, args, context) => {
@@ -80,9 +81,63 @@ export const Mutation: Required<MutationResolvers> = {
   addTestRequest: async (parent, args, context) => {
     if (context.auth.type !== "authorizeByApiKey")
       throw new AuthenticationError(`Unauthorized`);
-    await context.prisma.testRequest.update({
-      data: {},
-      where: {},
+
+    const testFile = await context.prisma.testFile.upsert({
+      create: {
+        path: args.testFilePath,
+        projectId: context.auth.project.id,
+      },
+      update: {},
+      where: {
+        path_projectId: {
+          path: args.testFilePath,
+          projectId: context.auth.project.id,
+        },
+      },
     });
+
+    const testRequest = await context.prisma.testRequest.upsert({
+      select: {
+        id: true,
+      },
+      create: {
+        name: args.requestName,
+        preRequest: args.preRequest ? JSON.parse(args.preRequest) : undefined,
+        preRequestCallback: args.preRequestCallback,
+        request: JSON.parse(args.request),
+        response: JSON.parse(args.response),
+        testCallback: args.testCallback,
+        testFile: {
+          connectOrCreate: {
+            where: {
+              path_projectId: {
+                path: args.testFilePath,
+                projectId: context.auth.project.id,
+              },
+            },
+            create: {
+              path: args.testFilePath,
+              projectId: context.auth.project.id,
+            },
+          },
+        },
+      },
+      update: {
+        name: args.requestName,
+        preRequest: args.preRequest ? JSON.parse(args.preRequest) : undefined,
+        preRequestCallback: args.preRequestCallback,
+        request: JSON.parse(args.request),
+        response: JSON.parse(args.response),
+        testCallback: args.testCallback,
+      },
+      where: {
+        name_testFileId: {
+          name: args.requestName,
+          testFileId: testFile.id,
+        },
+      },
+    });
+
+    return emptyTestRequest(testRequest.id);
   },
 };

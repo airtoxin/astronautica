@@ -3,7 +3,7 @@ import { createRequester } from "@astronautica/client/dist";
 describe("Astronautica Example", () => {
   jest.setTimeout(30 * 1000);
 
-  const request = createRequester("http://localhost:8080/trpc");
+  const request = createRequester("http://localhost:3000/api/graphql");
 
   it("States Current", async () => {
     await request("https://covidtracking.com/api/states")

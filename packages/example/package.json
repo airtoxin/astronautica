@@ -1,5 +1,6 @@
 {
-  "name": "example",
+  "name": "@astronautica/example",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "start": "jest src/example.test.ts"

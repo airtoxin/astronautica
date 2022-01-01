@@ -36,14 +36,8 @@ export const context = async ({
 
   const authorization = req.headers.authorization;
   if (typeof authorization === "string") {
-    const apiKey = authorization.split(" ")[1];
-    if (apiKey == null)
-      return {
-        auth: authService.unauthorized("Invalid Authorization header format"),
-        prisma,
-        res,
-      };
-    const auth = await authService.authorizeByCookie(apiKey);
+    const apiKey = authorization.replace("Bearer ", "");
+    const auth = await authService.authorizeByApiKey(apiKey);
     if (auth.type !== "unauthorized") return { auth, prisma, res };
   }
 
