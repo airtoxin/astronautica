@@ -1,8 +1,9 @@
-import { useEffect } from "react";
-import { Table } from "antd";
+import { useCallback, useEffect } from "react";
+import { Button, Collapse, Space, Table } from "antd";
 import { gql } from "@apollo/client";
 import {
   OrganizationIdPageQuery,
+  useOrganizationIdPageProjectCreationFormMutation,
   useOrganizationIdPageQuery,
 } from "../../graphql-types.gen";
 import Link from "next/link";
@@ -11,6 +12,10 @@ import { useSetRecoilState } from "recoil";
 import { Breadcrumb, BreadcrumbFragment } from "../../state";
 import { NextPage } from "next";
 import Head from "next/head";
+import {
+  FormState,
+  ProjectCreationForm,
+} from "../../components/ProjectCreationForm";
 
 gql`
   query OrganizationIdPage($organizationId: String!) {
@@ -30,6 +35,22 @@ gql`
       updatedAt
     }
   }
+
+  mutation OrganizationIdPageProjectCreationForm(
+    $organizationId: String!
+    $projectName: String!
+    $apiKeyDescription: String
+    $apiKeyExpiration: String
+  ) {
+    createProject(
+      organizationId: $organizationId
+      projectName: $projectName
+      apiKeyDescription: $apiKeyDescription
+      apiKeyExpiration: $apiKeyExpiration
+    ) {
+      id
+    }
+  }
 `;
 
 type Project = OrganizationIdPageQuery["projects"][number];
@@ -37,7 +58,7 @@ type Project = OrganizationIdPageQuery["projects"][number];
 export const OrganizationIdPage: NextPage = () => {
   const router = useRouter();
   const organizationId = [router.query.organizationId].flat()[0] ?? "";
-  const { data } = useOrganizationIdPageQuery({
+  const { data, refetch } = useOrganizationIdPageQuery({
     variables: { organizationId },
   });
   const setBreadcrumb = useSetRecoilState(Breadcrumb);
@@ -62,6 +83,20 @@ export const OrganizationIdPage: NextPage = () => {
       )
     );
   }, [data]);
+  const [createProject] = useOrganizationIdPageProjectCreationFormMutation();
+  const handleSubmit = useCallback(
+    (values: FormState) => {
+      createProject({
+        variables: {
+          organizationId,
+          projectName: values.name,
+          apiKeyDescription: values.apiKeyDescription,
+          apiKeyExpiration: values.expiration?.toISOString(),
+        },
+      }).then(() => refetch({ organizationId }));
+    },
+    [organizationId]
+  );
 
   if (data == null) return null;
   return (
@@ -69,31 +104,44 @@ export const OrganizationIdPage: NextPage = () => {
       <Head>
         <title>{data.organization.name} | Astronautica</title>
       </Head>
-      <Table<Project> dataSource={data.projects} pagination={false} rowKey="id">
-        <Table.Column<Project>
-          title="Project"
-          dataIndex="name"
-          key="name"
-          render={(name, row) => (
-            <Link
-              href={`/organization/${organizationId}/project/${row.id}`}
-              passHref
-            >
-              <a>{name}</a>
-            </Link>
-          )}
-        />
-        <Table.Column<Project>
-          title="Created"
-          dataIndex="createdAt"
-          key="createdAt"
-        />
-        <Table.Column<Project>
-          title="Updated"
-          dataIndex="updatedAt"
-          key="updatedAt"
-        />
-      </Table>
+      <Space direction="vertical" style={{ width: "100%" }}>
+        <Collapse ghost style={{ backgroundColor: "white" }}>
+          <Collapse.Panel key="new" header="Create project">
+            <div style={{ maxWidth: "30rem" }}>
+              <ProjectCreationForm onSubmit={handleSubmit} />
+            </div>
+          </Collapse.Panel>
+        </Collapse>
+        <Table<Project>
+          dataSource={data.projects}
+          pagination={false}
+          rowKey="id"
+        >
+          <Table.Column<Project>
+            title="Project"
+            dataIndex="name"
+            key="name"
+            render={(name, row) => (
+              <Link
+                href={`/organization/${organizationId}/project/${row.id}`}
+                passHref
+              >
+                <a>{name}</a>
+              </Link>
+            )}
+          />
+          <Table.Column<Project>
+            title="Created"
+            dataIndex="createdAt"
+            key="createdAt"
+          />
+          <Table.Column<Project>
+            title="Updated"
+            dataIndex="updatedAt"
+            key="updatedAt"
+          />
+        </Table>
+      </Space>
     </>
   );
 };

@@ -3,10 +3,12 @@ import { Account } from "./Account";
 import { Organization } from "./Organization";
 import { Query } from "./Query";
 import { Mutation } from "./Mutation";
+import { Project } from "./Project";
 
 export const resolvers: Resolvers = {
   Account,
   Organization,
+  Project,
   Query,
   Mutation,
 };

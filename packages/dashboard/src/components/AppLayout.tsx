@@ -22,7 +22,7 @@ export const AppLayout: FunctionComponent = ({ children }) => {
           </Menu.Item>
         </Menu>
       </Layout.Sider>
-      <Layout style={{ backgroundColor: "white" }}>
+      <Layout>
         <Layout.Content style={{ padding: "1rem 1rem 0" }}>
           <GlobalBreadcrumb />
           <Divider />

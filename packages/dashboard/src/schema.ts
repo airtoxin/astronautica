@@ -36,8 +36,8 @@ export const typeDefs = gql`
     id: ID!
     status: ApiKeyStatus!
     description: String
-    expiresAt: String!
-    lastUsedAt: String!
+    expiresAt: String
+    lastUsedAt: String
     createdAt: String!
     updatedAt: String!
   }
@@ -72,5 +72,11 @@ export const typeDefs = gql`
 
   type Mutation {
     login(idToken: String!): Boolean
+    createProject(
+      organizationId: String!
+      projectName: String!
+      apiKeyDescription: String
+      apiKeyExpiration: String
+    ): Project!
   }
 `;

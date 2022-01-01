@@ -1,8 +1,9 @@
 import { MutationResolvers } from "../graphql-types.gen";
 import { authService } from "../services/AuthService";
-import { AuthenticationError } from "apollo-server-micro";
+import { AuthenticationError, ForbiddenError } from "apollo-server-micro";
 import { COOKIE_SESSION_KEY } from "../constants";
 import cookie from "cookie";
+import { emptyProject } from "./Project";
 
 export const Mutation: Required<MutationResolvers> = {
   login: async (parent, args, context) => {
@@ -41,5 +42,39 @@ export const Mutation: Required<MutationResolvers> = {
       })
     );
     return true;
+  },
+  createProject: async (parent, args, context) => {
+    if (context.auth.type !== "authorizeByCookie")
+      throw new AuthenticationError(`Unauthorized`);
+    if (!context.auth.organizations.some((o) => o.id === args.organizationId))
+      throw new ForbiddenError(
+        `Project for Organization for id:${args.organizationId} not found`
+      );
+
+    const { id, organizationId } = await context.prisma.project.create({
+      data: {
+        organizationId: args.organizationId,
+        name: args.projectName,
+        apiKeys: {
+          create: [
+            {
+              status: "ENABLE",
+              description: args.apiKeyDescription,
+              expiresAt: args.apiKeyExpiration,
+              createdBy: {
+                connect: {
+                  id: context.auth.account.id,
+                },
+              },
+            },
+          ],
+        },
+      },
+      select: {
+        id: true,
+        organizationId: true,
+      },
+    });
+    return emptyProject(id, organizationId);
   },
 };
