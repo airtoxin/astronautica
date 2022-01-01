@@ -28,6 +28,7 @@ export const AppLayout: FunctionComponent = ({ children }) => {
           <Divider />
           {children}
         </Layout.Content>
+        <div style={{ height: "50vh" }} />
       </Layout>
     </Layout>
   );

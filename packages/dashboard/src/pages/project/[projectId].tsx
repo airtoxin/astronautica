@@ -6,6 +6,7 @@ import { useSetRecoilState } from "recoil";
 import { Breadcrumb, BreadcrumbFragment } from "../../state";
 import { useEffect } from "react";
 import Head from "next/head";
+import { Collapse, List } from "antd";
 
 gql`
   query ProjectIdPage($projectId: String!) {
@@ -22,6 +23,20 @@ gql`
         id
         name
         projects {
+          id
+          name
+        }
+      }
+      apiKeys {
+        description
+        createdAt
+        updatedAt
+        lastUsedAt
+        expiresAt
+      }
+      testFiles {
+        path
+        testRequests {
           id
           name
         }
@@ -72,6 +87,22 @@ export const ProjectIdPage: NextPage = () => {
       <Head>
         <title>{data.project.name} | Astronautica</title>
       </Head>
+      <pre>{JSON.stringify(data.project, null, 2)}</pre>
+      <Collapse>
+        {data.project.testFiles.map((testFile) => (
+          <Collapse.Panel key={testFile.path} header={testFile.path}>
+            <List
+              itemLayout="horizontal"
+              dataSource={testFile.testRequests}
+              renderItem={(testFile) => (
+                <List.Item>
+                  <List.Item.Meta title={<span>{testFile.name}</span>} />
+                </List.Item>
+              )}
+            />
+          </Collapse.Panel>
+        ))}
+      </Collapse>
     </>
   );
 };
