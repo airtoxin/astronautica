@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, VoidFunctionComponent } from "react";
+import { useMemo, useState, VoidFunctionComponent } from "react";
 import {
   Button,
   Checkbox,
@@ -12,21 +12,13 @@ import {
 import addDays from "date-fns/addDays";
 import format from "date-fns/format";
 
-export type FormState =
-  | {
-      name: string;
-      createApiKey: false;
-      apiKeyDescription: undefined;
-      expiration: undefined;
-    }
-  | {
-      name: string;
-      createApiKey: true;
-      apiKeyDescription: string;
-      expiration: Date | null;
-    };
+export type FormState = {
+  name: string;
+  apiKeyDescription?: string;
+  expiration?: Date | null;
+};
 type Props = {
-  onSubmit: (values: FormState) => unknown;
+  onSubmit: (values: FormState) => Promise<void>;
 };
 export const ProjectCreationForm: VoidFunctionComponent<Props> = ({
   onSubmit,
@@ -46,7 +38,15 @@ export const ProjectCreationForm: VoidFunctionComponent<Props> = ({
       name="basic"
       layout="vertical"
       onFinish={(values) =>
-        onSubmit(values.createApiKey ? { ...values, expiration } : values)
+        onSubmit(withApiKey ? { ...values, expiration } : values).then(() => {
+          form.resetFields([
+            "name",
+            "createApiKey",
+            "apiKeyDescription",
+            "expiration",
+          ]);
+          setWithApiKey(false);
+        })
       }
     >
       <Form.Item
@@ -57,8 +57,11 @@ export const ProjectCreationForm: VoidFunctionComponent<Props> = ({
         <Input />
       </Form.Item>
 
-      <Form.Item name="createApiKey" valuePropName="checked">
-        <Checkbox onChange={() => setWithApiKey((s) => !s)}>
+      <Form.Item>
+        <Checkbox
+          checked={withApiKey}
+          onChange={() => setWithApiKey((s) => !s)}
+        >
           Also create new API key
         </Checkbox>
       </Form.Item>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import { Button, Collapse, Space, Table } from "antd";
+import { Collapse, Space, Table, Tag } from "antd";
 import { gql } from "@apollo/client";
 import {
   OrganizationIdPageQuery,
@@ -33,6 +33,10 @@ gql`
       name
       createdAt
       updatedAt
+      apiKeys {
+        status
+        expiresAt
+      }
     }
   }
 
@@ -85,7 +89,7 @@ export const OrganizationIdPage: NextPage = () => {
   }, [data]);
   const [createProject] = useOrganizationIdPageProjectCreationFormMutation();
   const handleSubmit = useCallback(
-    (values: FormState) => {
+    (values: FormState) =>
       createProject({
         variables: {
           organizationId,
@@ -93,8 +97,9 @@ export const OrganizationIdPage: NextPage = () => {
           apiKeyDescription: values.apiKeyDescription,
           apiKeyExpiration: values.expiration?.toISOString(),
         },
-      }).then(() => refetch({ organizationId }));
-    },
+      }).then(() => {
+        refetch({ organizationId });
+      }),
     [organizationId]
   );
 
@@ -140,10 +145,38 @@ export const OrganizationIdPage: NextPage = () => {
             dataIndex="updatedAt"
             key="updatedAt"
           />
+          <Table.Column<Project>
+            title="API key"
+            dataIndex="apiKeys"
+            key="apiKeys"
+            render={(_, record) =>
+              Object.entries(apiKeysToTags(record.apiKeys)).map(
+                ([key, count]) => (
+                  <Tag key={key}>
+                    {key} ({count})
+                  </Tag>
+                )
+              )
+            }
+          />
         </Table>
       </Space>
     </>
   );
+};
+
+export const apiKeysToTags = (
+  apiKeys: Project["apiKeys"]
+): { [key: string]: number } => {
+  const tags = new Map();
+  for (const apiKey of apiKeys) {
+    if (new Date(apiKey.expiresAt ?? "") < new Date()) {
+      tags.set("Expired", (tags.get("Expired") ?? 0) + 1);
+    } else {
+      tags.set(apiKey.status, (tags.get(apiKey.status) ?? 0) + 1);
+    }
+  }
+  return Object.fromEntries(tags.entries());
 };
 
 export default OrganizationIdPage;
