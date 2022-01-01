@@ -127,10 +127,7 @@ export const OrganizationIdPage: NextPage = () => {
             dataIndex="name"
             key="name"
             render={(name, row) => (
-              <Link
-                href={`/organization/${organizationId}/project/${row.id}`}
-                passHref
-              >
+              <Link href={`/project/${row.id}`} passHref>
                 <a>{name}</a>
               </Link>
             )}
