@@ -91,7 +91,7 @@ class AstronauticaClient {
   async serialize(res: Response): Promise<AddTestRequestMutationVariables> {
     const testState = expect.getState();
     return {
-      testFilePath: testState.testPath,
+      testFilePath: testState.testPath.replace(process.cwd(), ""),
       requestName: testState.currentTestName,
       preRequest:
         this.preReq == null ? undefined : serializeRequest(await this.preReq),
