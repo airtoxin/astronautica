@@ -1,6 +1,14 @@
 {
   "name": "@astronautica/client",
   "version": "0.0.1",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "codegen": "run-s codegen:*",
     "codegen:wait": "wait-on http-get://localhost:3000/api/healthcheck",

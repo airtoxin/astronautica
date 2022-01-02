@@ -1,4 +1,4 @@
-import { createRequester } from "@astronautica/client/dist";
+import { createRequester } from "@astronautica/client";
 
 describe("Astronautica Example", () => {
   jest.setTimeout(30 * 1000);
