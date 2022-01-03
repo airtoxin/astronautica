@@ -6,6 +6,9 @@ import { Mutation } from "./Mutation";
 import { Project } from "./Project";
 import { TestFile } from "./TestFile";
 import { TestRequest } from "./TestRequest";
+import { RequestData } from "./RequestData";
+import { PreRequestData } from "./PreRequestData";
+import { ResponseData } from "./ResponseData";
 
 export const resolvers: Resolvers = {
   Account,
@@ -13,6 +16,9 @@ export const resolvers: Resolvers = {
   Project,
   TestFile,
   TestRequest,
+  PreRequestData,
+  RequestData,
+  ResponseData,
   Query,
   Mutation,
 };

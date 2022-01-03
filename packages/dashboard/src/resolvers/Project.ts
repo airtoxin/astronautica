@@ -1,4 +1,8 @@
-import { Project as ProjectType, ProjectResolvers } from "../graphql-types.gen";
+import {
+  Organization,
+  Project as ProjectType,
+  ProjectResolvers,
+} from "../graphql-types.gen";
 import { emptyOrganization } from "./Organization";
 import { UserInputError } from "apollo-server-micro";
 import { emptyApiKey } from "./ApiKey";
@@ -59,7 +63,12 @@ export const Project: ProjectResolvers = {
     });
     if (project == null)
       throw new UserInputError(`Project not found for id:${parent.id}`);
-    return project.testFiles.map(({ id }) => emptyTestFile(id));
+    return project.testFiles.map(({ id }) =>
+      emptyTestFile(
+        id,
+        emptyProject(parent.id, emptyOrganization(project.organizationId))
+      )
+    );
   },
   organization: async (parent, args, context) => {
     const project = await context.prisma.project.findUnique({
@@ -75,7 +84,7 @@ export const Project: ProjectResolvers = {
 
 export const emptyProject = (
   projectId: string,
-  organizationId: string
+  organization: Organization
 ): ProjectType => ({
   id: projectId,
   name: "",
@@ -83,5 +92,5 @@ export const emptyProject = (
   updatedAt: "",
   apiKeys: [],
   testFiles: [],
-  organization: emptyOrganization(organizationId),
+  organization,
 });

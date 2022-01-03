@@ -5,6 +5,8 @@ import { COOKIE_SESSION_KEY } from "../constants";
 import cookie from "cookie";
 import { emptyProject } from "./Project";
 import { emptyTestRequest } from "./TestRequest";
+import { emptyOrganization } from "./Organization";
+import { emptyTestFile } from "./TestFile";
 
 export const Mutation: Required<MutationResolvers> = {
   login: async (parent, args, context) => {
@@ -76,7 +78,7 @@ export const Mutation: Required<MutationResolvers> = {
         organizationId: true,
       },
     });
-    return emptyProject(id, organizationId);
+    return emptyProject(id, emptyOrganization(organizationId));
   },
   addTestRequest: async (parent, args, context) => {
     if (context.auth.type !== "authorizeByApiKey")
@@ -99,23 +101,60 @@ export const Mutation: Required<MutationResolvers> = {
     const testRequest = await context.prisma.testRequest.upsert({
       select: {
         id: true,
+        testFile: {
+          select: {
+            id: true,
+            project: true,
+          },
+        },
+      },
+      where: {
+        name_testFileId: {
+          name: args.requestName,
+          testFileId: testFile.id,
+        },
       },
       create: {
         name: args.requestName,
-        preRequest: args.preRequest ? JSON.parse(args.preRequest) : undefined,
+        preRequest:
+          args.preRequest == null
+            ? undefined
+            : {
+                connectOrCreate: {
+                  where: {},
+                  create: {
+                    url: args.preRequest.url,
+                    method: args.preRequest.method,
+                    headers: args.preRequest.headers,
+                  },
+                },
+              },
         preRequestCallback: args.preRequestCallback,
-        request: JSON.parse(args.request),
-        response: JSON.parse(args.response),
+        request: {
+          connectOrCreate: {
+            where: {},
+            create: {
+              url: args.request.url,
+              method: args.request.method,
+              headers: args.request.headers,
+            },
+          },
+        },
+        response: {
+          connectOrCreate: {
+            where: {},
+            create: {
+              url: args.response.url,
+              body: args.response.body,
+              status: args.response.status,
+              headers: args.response.headers,
+            },
+          },
+        },
         testCallback: args.testCallback,
         testFile: {
-          connectOrCreate: {
-            where: {
-              path_projectId: {
-                path: args.testFilePath,
-                projectId: context.auth.project.id,
-              },
-            },
-            create: {
+          connect: {
+            path_projectId: {
               path: args.testFilePath,
               projectId: context.auth.project.id,
             },
@@ -124,20 +163,54 @@ export const Mutation: Required<MutationResolvers> = {
       },
       update: {
         name: args.requestName,
-        preRequest: args.preRequest ? JSON.parse(args.preRequest) : undefined,
+        preRequest:
+          args.preRequest == null
+            ? undefined
+            : {
+                connectOrCreate: {
+                  where: {},
+                  create: {
+                    url: args.preRequest.url,
+                    method: args.preRequest.method,
+                    headers: args.preRequest.headers,
+                  },
+                },
+              },
         preRequestCallback: args.preRequestCallback,
-        request: JSON.parse(args.request),
-        response: JSON.parse(args.response),
-        testCallback: args.testCallback,
-      },
-      where: {
-        name_testFileId: {
-          name: args.requestName,
-          testFileId: testFile.id,
+        request: {
+          connectOrCreate: {
+            where: {},
+            create: {
+              url: args.request.url,
+              method: args.request.method,
+              headers: args.request.headers,
+            },
+          },
         },
+        response: {
+          connectOrCreate: {
+            where: {},
+            create: {
+              url: args.response.url,
+              body: args.response.body,
+              status: args.response.status,
+              headers: args.response.headers,
+            },
+          },
+        },
+        testCallback: args.testCallback,
       },
     });
 
-    return emptyTestRequest(testRequest.id);
+    return emptyTestRequest(
+      testRequest.id,
+      emptyTestFile(
+        testRequest.testFile.id,
+        emptyProject(
+          testRequest.testFile.project.id,
+          emptyOrganization(testRequest.testFile.project.organizationId)
+        )
+      )
+    );
   },
 };

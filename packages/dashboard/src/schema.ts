@@ -101,6 +101,25 @@ export const typeDefs = gql`
     testRequest(testRequestId: String!): TestRequest!
   }
 
+  input AddTestRequestPreRequest {
+    url: String!
+    method: String!
+    headers: Map!
+  }
+
+  input AddTestRequestRequest {
+    url: String!
+    method: String!
+    headers: Map!
+  }
+
+  input AddTestRequestResponse {
+    url: String!
+    body: String
+    status: Int!
+    headers: Map!
+  }
+
   type Mutation {
     login(idToken: String!): Boolean
     createProject(
@@ -112,10 +131,10 @@ export const typeDefs = gql`
     addTestRequest(
       testFilePath: String!
       requestName: String!
-      preRequest: String
+      preRequest: AddTestRequestPreRequest
       preRequestCallback: String
-      request: String!
-      response: String!
+      request: AddTestRequestRequest!
+      response: AddTestRequestResponse!
       testCallback: String
     ): TestRequest!
   }

@@ -43,7 +43,9 @@ export const Organization: OrganizationResolvers = {
         id: true,
       },
     });
-    return projects.map(({ id }) => emptyProject(id, parent.id));
+    return projects.map(({ id }) =>
+      emptyProject(id, emptyOrganization(parent.id))
+    );
   },
 };
 

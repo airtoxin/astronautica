@@ -39,7 +39,10 @@ export const Query: Required<QueryResolvers> = {
     });
     if (project == null)
       throw new ForbiddenError(`Project for id:${args.projectId} not found`);
-    return emptyProject(args.projectId, project.organizationId);
+    return emptyProject(
+      args.projectId,
+      emptyOrganization(project.organizationId)
+    );
   },
   projects: async (parent, args, context) => {
     if (context.auth.type !== "authorizeByCookie")
@@ -64,7 +67,7 @@ export const Query: Required<QueryResolvers> = {
       },
     });
     return projects.map(({ id, organizationId }) =>
-      emptyProject(id, organizationId)
+      emptyProject(id, emptyOrganization(organizationId))
     );
   },
   testFile: async (parent, args, context) => {
@@ -94,8 +97,10 @@ export const Query: Required<QueryResolvers> = {
       throw new ForbiddenError(`TestFile for id:${args.testFileId} not found`);
     return emptyTestFile(
       testFile.id,
-      testFile.project.id,
-      testFile.project.organizationId
+      emptyProject(
+        testFile.project.id,
+        emptyOrganization(testFile.project.organizationId)
+      )
     );
   },
   testRequest: async (parent, args, context) => {
@@ -134,9 +139,13 @@ export const Query: Required<QueryResolvers> = {
       );
     return emptyTestRequest(
       testRequest.id,
-      testRequest.testFile.id,
-      testRequest.testFile.project.id,
-      testRequest.testFile.project.organizationId
+      emptyTestFile(
+        testRequest.testFile.id,
+        emptyProject(
+          testRequest.testFile.project.id,
+          emptyOrganization(testRequest.testFile.project.organizationId)
+        )
+      )
     );
   },
 };

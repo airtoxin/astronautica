@@ -1,10 +1,12 @@
 import {
+  Project,
   TestFile as TestFileType,
   TestFileResolvers,
 } from "../graphql-types.gen";
 import { UserInputError } from "apollo-server-micro";
 import { emptyTestRequest } from "./TestRequest";
 import { emptyProject } from "./Project";
+import { emptyOrganization } from "./Organization";
 
 export const TestFile: TestFileResolvers = {
   path: async (parent, args, context) => {
@@ -60,23 +62,23 @@ export const TestFile: TestFileResolvers = {
     return testFile.testRequests.map(({ id }) =>
       emptyTestRequest(
         id,
-        parent.id,
-        testFile.projectId,
-        testFile.project.organizationId
+        emptyTestFile(
+          parent.id,
+          emptyProject(
+            testFile.projectId,
+            emptyOrganization(testFile.project.organizationId)
+          )
+        )
       )
     );
   },
 };
 
-export const emptyTestFile = (
-  id: string,
-  projectId: string,
-  organizationId: string
-): TestFileType => ({
+export const emptyTestFile = (id: string, project: Project): TestFileType => ({
   id,
   path: "",
   createdAt: "",
   updatedAt: "",
   testRequests: [],
-  project: emptyProject(projectId, organizationId),
+  project,
 });
