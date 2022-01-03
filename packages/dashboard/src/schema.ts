@@ -1,6 +1,8 @@
 import { gql } from "apollo-server-micro";
 
 export const typeDefs = gql`
+  scalar Map
+
   type Account {
     id: ID!
     email: String!
@@ -54,14 +56,39 @@ export const typeDefs = gql`
   type TestRequest {
     id: ID!
     name: String!
-    preRequest: String
+    preRequest: PreRequestData
     preRequestCallback: String
-    request: String!
-    response: String!
+    request: RequestData
+    response: ResponseData
     testCallback: String
     createdAt: String!
     updatedAt: String!
     testFile: TestFile!
+  }
+
+  type PreRequestData {
+    id: ID!
+    url: String!
+    method: String!
+    headers: Map!
+    testRequest: TestRequest!
+  }
+
+  type RequestData {
+    id: ID!
+    url: String!
+    method: String!
+    headers: Map!
+    testRequest: TestRequest!
+  }
+
+  type ResponseData {
+    id: ID!
+    url: String!
+    body: String
+    status: Int!
+    headers: Map!
+    testRequest: TestRequest!
   }
 
   type Query {

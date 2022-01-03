@@ -2,22 +2,31 @@ import { NextPage } from "next";
 import { gql } from "@apollo/client";
 import {
   useRequestIdPageQuery,
-  useRequestIdPageResponseLazyQuery,
+  useRequestIdPageResponseBodyQuery,
   useRequestIdPageSideQuery,
 } from "../../../../graphql-types.gen";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { Layout, Menu } from "antd";
 import Link from "next/link";
-import { useEffect } from "react";
 
 gql`
   query RequestIdPage($requestId: String!) {
     testRequest(testRequestId: $requestId) {
       name
-      preRequest
+      preRequest {
+        headers
+      }
       preRequestCallback
-      request
+      request {
+        url
+        method
+        headers
+      }
+      response {
+        status
+        headers
+      }
       testCallback
       updatedAt
     }
@@ -36,9 +45,11 @@ gql`
     }
   }
 
-  query RequestIdPageResponse($requestId: String!) {
+  query RequestIdPageResponseBody($requestId: String!) {
     testRequest(testRequestId: $requestId) {
-      response
+      response {
+        body
+      }
     }
   }
 `;
@@ -51,11 +62,9 @@ export const RequestIdPage: NextPage = () => {
   const { data: sideData } = useRequestIdPageSideQuery({
     variables: { projectId },
   });
-  const [fetchResponse, { data: responseData }] =
-    useRequestIdPageResponseLazyQuery({ variables: { requestId } });
-  useEffect(() => {
-    fetchResponse();
-  }, []);
+  const { data: responseData } = useRequestIdPageResponseBodyQuery({
+    variables: { requestId },
+  });
 
   return (
     <>
@@ -86,13 +95,7 @@ export const RequestIdPage: NextPage = () => {
         <Layout style={{ overflow: "scroll" }}>
           <Layout.Content style={{ padding: "1rem 1rem 0" }}>
             <pre>{JSON.stringify(data, null, 2)}</pre>
-            <pre>
-              {JSON.stringify(
-                JSON.parse(responseData?.testRequest.response ?? "{}"),
-                null,
-                2
-              )}
-            </pre>
+            <pre>{JSON.stringify(responseData, null, 2)}</pre>
             <div style={{ height: "50vh" }} />
           </Layout.Content>
         </Layout>

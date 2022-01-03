@@ -15,7 +15,6 @@ model Account {
   organizations     Organization[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  ApiKey            ApiKey[]
 }
 
 model DashboardSession {
@@ -49,14 +48,12 @@ model ApiKey {
   id          String       @id @default(uuid())
   status      ApiKeyStatus
   description String?
-  createdBy   Account      @relation(fields: [accountId], references: [id])
   expiresAt   DateTime?
   lastUsedAt  DateTime?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   project     Project      @relation(fields: [projectId], references: [id])
   projectId   String
-  accountId   String
 }
 
 enum ApiKeyStatus {
@@ -77,30 +74,38 @@ model TestFile {
 }
 
 model TestRequest {
-  id                 String        @id @default(uuid())
+  id                 String          @id @default(uuid())
   name               String
-  preRequest         RequestData?  @relation("preRequest")
+  preRequest         PreRequestData?
+  preRequestDataId   String?
   preRequestCallback String?
-  request            RequestData?  @relation("request")
+  request            RequestData?
   response           ResponseData?
   testCallback       String?
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  testFile           TestFile      @relation(fields: [testFileId], references: [id])
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  testFile           TestFile        @relation(fields: [testFileId], references: [id])
   testFileId         String
 
   @@unique([name, testFileId])
 }
 
+model PreRequestData {
+  id            String      @id @default(uuid())
+  url           String
+  method        String
+  headers       Json
+  testRequest   TestRequest @relation(fields: [testRequestId], references: [id])
+  testRequestId String      @unique
+}
+
 model RequestData {
-  id                        String      @id @default(uuid())
-  url                       String
-  method                    String
-  headers                   Json
-  preRequest                TestRequest @relation("preRequest", fields: [testRequestIdOfPreRequest], references: [id])
-  testRequestIdOfPreRequest String      @unique
-  request                   TestRequest @relation("request", fields: [testRequestIdOfRequest], references: [id])
-  testRequestIdOfRequest    String      @unique
+  id            String      @id @default(uuid())
+  url           String
+  method        String
+  headers       Json
+  testRequest   TestRequest @relation(fields: [testRequestId], references: [id])
+  testRequestId String      @unique
 }
 
 model ResponseData {
