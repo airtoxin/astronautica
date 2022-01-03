@@ -77,17 +77,38 @@ model TestFile {
 }
 
 model TestRequest {
-  id                 String   @id @default(uuid())
+  id                 String        @id @default(uuid())
   name               String
-  preRequest         Json?
+  preRequest         RequestData?  @relation("preRequest")
   preRequestCallback String?
-  request            Json
-  response           Json
+  request            RequestData?  @relation("request")
+  response           ResponseData?
   testCallback       String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  testFile           TestFile @relation(fields: [testFileId], references: [id])
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  testFile           TestFile      @relation(fields: [testFileId], references: [id])
   testFileId         String
 
   @@unique([name, testFileId])
+}
+
+model RequestData {
+  id                        String      @id @default(uuid())
+  url                       String
+  method                    String
+  headers                   Json
+  preRequest                TestRequest @relation("preRequest", fields: [testRequestIdOfPreRequest], references: [id])
+  testRequestIdOfPreRequest String      @unique
+  request                   TestRequest @relation("request", fields: [testRequestIdOfRequest], references: [id])
+  testRequestIdOfRequest    String      @unique
+}
+
+model ResponseData {
+  id            String      @id @default(uuid())
+  url           String
+  body          String?
+  status        Int
+  headers       Json
+  testRequest   TestRequest @relation(fields: [testRequestId], references: [id])
+  testRequestId String      @unique
 }

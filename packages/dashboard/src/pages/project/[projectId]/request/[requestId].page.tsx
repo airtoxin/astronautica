@@ -86,7 +86,13 @@ export const RequestIdPage: NextPage = () => {
         <Layout style={{ overflow: "scroll" }}>
           <Layout.Content style={{ padding: "1rem 1rem 0" }}>
             <pre>{JSON.stringify(data, null, 2)}</pre>
-
+            <pre>
+              {JSON.stringify(
+                JSON.parse(responseData?.testRequest.response ?? "{}"),
+                null,
+                2
+              )}
+            </pre>
             <div style={{ height: "50vh" }} />
           </Layout.Content>
         </Layout>
