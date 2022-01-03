@@ -6,7 +6,8 @@ import { useSetRecoilState } from "recoil";
 import { Breadcrumb, BreadcrumbFragment } from "../../state";
 import { useEffect } from "react";
 import Head from "next/head";
-import { Collapse, List } from "antd";
+import { Collapse, Layout, List, Menu } from "antd";
+import Link from "next/link";
 
 gql`
   query ProjectIdPage($projectId: String!) {
@@ -87,22 +88,32 @@ export const ProjectIdPage: NextPage = () => {
       <Head>
         <title>{data.project.name} | Astronautica</title>
       </Head>
-      <pre>{JSON.stringify(data.project, null, 2)}</pre>
-      <Collapse>
-        {data.project.testFiles.map((testFile) => (
-          <Collapse.Panel key={testFile.path} header={testFile.path}>
-            <List
-              itemLayout="horizontal"
-              dataSource={testFile.testRequests}
-              renderItem={(testFile) => (
-                <List.Item>
-                  <List.Item.Meta title={<span>{testFile.name}</span>} />
-                </List.Item>
-              )}
-            />
-          </Collapse.Panel>
-        ))}
-      </Collapse>
+      <Layout>
+        <Layout.Sider style={{ backgroundColor: "white" }} width={400}>
+          <Menu
+            mode="inline"
+            defaultOpenKeys={data.project.testFiles.map((tf) => tf.path)}
+          >
+            {data.project.testFiles.map((tf) => (
+              <Menu.SubMenu key={tf.path} title={tf.path}>
+                {tf.testRequests.map((tr) => (
+                  <Menu.Item key={tr.id}>
+                    <Link href={`/project/${projectId}/request/${tr.id}`}>
+                      {tr.name}
+                    </Link>
+                  </Menu.Item>
+                ))}
+              </Menu.SubMenu>
+            ))}
+          </Menu>
+        </Layout.Sider>
+        <Layout style={{ overflow: "scroll" }}>
+          <Layout.Content style={{ padding: "1rem 1rem 0" }}>
+            <pre>{JSON.stringify(data, null, 2)}</pre>
+            <div style={{ height: "50vh" }} />
+          </Layout.Content>
+        </Layout>
+      </Layout>
     </>
   );
 };

@@ -3,6 +3,7 @@ import {
   TestRequestResolvers,
 } from "../graphql-types.gen";
 import { UserInputError } from "apollo-server-micro";
+import { emptyTestFile } from "./TestFile";
 
 export const TestRequest: TestRequestResolvers = {
   name: async (parent, args, context) => {
@@ -57,11 +58,17 @@ export const TestRequest: TestRequestResolvers = {
   },
 };
 
-export const emptyTestRequest = (id: string): TestRequestType => ({
+export const emptyTestRequest = (
+  id: string,
+  testFileId: string,
+  projectId: string,
+  organizationId: string
+): TestRequestType => ({
   id,
   name: "",
   request: "",
   response: "",
   createdAt: "",
   updatedAt: "",
+  testFile: emptyTestFile(testFileId, projectId, organizationId),
 });

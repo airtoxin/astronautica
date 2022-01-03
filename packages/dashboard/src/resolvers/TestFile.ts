@@ -4,6 +4,7 @@ import {
 } from "../graphql-types.gen";
 import { UserInputError } from "apollo-server-micro";
 import { emptyTestRequest } from "./TestRequest";
+import { emptyProject } from "./Project";
 
 export const TestFile: TestFileResolvers = {
   path: async (parent, args, context) => {
@@ -47,18 +48,35 @@ export const TestFile: TestFileResolvers = {
             id: true,
           },
         },
+        project: {
+          select: {
+            organizationId: true,
+          },
+        },
       },
     });
     if (testFile == null)
       throw new UserInputError(`testFile not found for id:${parent.id}`);
-    return testFile.testRequests.map(({ id }) => emptyTestRequest(id));
+    return testFile.testRequests.map(({ id }) =>
+      emptyTestRequest(
+        id,
+        parent.id,
+        testFile.projectId,
+        testFile.project.organizationId
+      )
+    );
   },
 };
 
-export const emptyTestFile = (id: string): TestFileType => ({
+export const emptyTestFile = (
+  id: string,
+  projectId: string,
+  organizationId: string
+): TestFileType => ({
   id,
   path: "",
   createdAt: "",
   updatedAt: "",
   testRequests: [],
+  project: emptyProject(projectId, organizationId),
 });

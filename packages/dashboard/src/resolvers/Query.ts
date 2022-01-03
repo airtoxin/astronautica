@@ -3,6 +3,8 @@ import { AuthenticationError, ForbiddenError } from "apollo-server-micro";
 import { emptyAccount } from "./Account";
 import { emptyOrganization } from "./Organization";
 import { emptyProject } from "./Project";
+import { emptyTestFile } from "./TestFile";
+import { emptyTestRequest } from "./TestRequest";
 
 export const Query: Required<QueryResolvers> = {
   viewer: async (parent, args, context) => {
@@ -63,6 +65,78 @@ export const Query: Required<QueryResolvers> = {
     });
     return projects.map(({ id, organizationId }) =>
       emptyProject(id, organizationId)
+    );
+  },
+  testFile: async (parent, args, context) => {
+    if (context.auth.type !== "authorizeByCookie")
+      throw new AuthenticationError(`Unauthorized`);
+
+    const testFile = await context.prisma.testFile.findFirst({
+      select: {
+        id: true,
+        project: {
+          select: {
+            id: true,
+            organizationId: true,
+          },
+        },
+      },
+      where: {
+        id: args.testFileId,
+        project: {
+          organizationId: {
+            in: context.auth.organizations.map((o) => o.id),
+          },
+        },
+      },
+    });
+    if (testFile == null)
+      throw new ForbiddenError(`TestFile for id:${args.testFileId} not found`);
+    return emptyTestFile(
+      testFile.id,
+      testFile.project.id,
+      testFile.project.organizationId
+    );
+  },
+  testRequest: async (parent, args, context) => {
+    if (context.auth.type !== "authorizeByCookie")
+      throw new AuthenticationError(`Unauthorized`);
+
+    const testRequest = await context.prisma.testRequest.findFirst({
+      select: {
+        id: true,
+        testFile: {
+          select: {
+            id: true,
+            project: {
+              select: {
+                id: true,
+                organizationId: true,
+              },
+            },
+          },
+        },
+      },
+      where: {
+        id: args.testRequestId,
+        testFile: {
+          project: {
+            organizationId: {
+              in: context.auth.organizations.map((o) => o.id),
+            },
+          },
+        },
+      },
+    });
+    if (testRequest == null)
+      throw new ForbiddenError(
+        `TestRequest for id:${args.testRequestId} not found`
+      );
+    return emptyTestRequest(
+      testRequest.id,
+      testRequest.testFile.id,
+      testRequest.testFile.project.id,
+      testRequest.testFile.project.organizationId
     );
   },
 };

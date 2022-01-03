@@ -48,6 +48,7 @@ export const typeDefs = gql`
     createdAt: String!
     updatedAt: String!
     testRequests: [TestRequest!]!
+    project: Project!
   }
 
   type TestRequest {
@@ -60,6 +61,7 @@ export const typeDefs = gql`
     testCallback: String
     createdAt: String!
     updatedAt: String!
+    testFile: TestFile!
   }
 
   type Query {
@@ -68,6 +70,8 @@ export const typeDefs = gql`
     organizations: [Organization!]!
     project(projectId: String!): Project!
     projects(organizationId: String): [Project!]!
+    testFile(testFileId: String!): TestFile!
+    testRequest(testRequestId: String!): TestRequest!
   }
 
   type Mutation {
