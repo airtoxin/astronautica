@@ -85,16 +85,19 @@ export const Mutation: Required<MutationResolvers> = {
       throw new AuthenticationError(`Unauthorized`);
 
     const testFile = await context.prisma.testFile.upsert({
-      create: {
-        path: args.testFilePath,
-        projectId: context.auth.project.id,
-      },
-      update: {},
       where: {
         path_projectId: {
           path: args.testFilePath,
           projectId: context.auth.project.id,
         },
+      },
+      create: {
+        path: args.testFilePath,
+        projectId: context.auth.project.id,
+      },
+      update: {
+        path: args.testFilePath,
+        projectId: context.auth.project.id,
       },
     });
 
@@ -116,89 +119,74 @@ export const Mutation: Required<MutationResolvers> = {
       },
       create: {
         name: args.requestName,
-        preRequest:
-          args.preRequest == null
-            ? undefined
-            : {
-                connectOrCreate: {
-                  where: {},
-                  create: {
-                    url: args.preRequest.url,
-                    method: args.preRequest.method,
-                    headers: args.preRequest.headers,
-                  },
-                },
-              },
         preRequestCallback: args.preRequestCallback,
-        request: {
-          connectOrCreate: {
-            where: {},
-            create: {
-              url: args.request.url,
-              method: args.request.method,
-              headers: args.request.headers,
-            },
-          },
-        },
-        response: {
-          connectOrCreate: {
-            where: {},
-            create: {
-              url: args.response.url,
-              body: args.response.body,
-              status: args.response.status,
-              headers: args.response.headers,
-            },
-          },
-        },
         testCallback: args.testCallback,
-        testFile: {
-          connect: {
-            path_projectId: {
-              path: args.testFilePath,
-              projectId: context.auth.project.id,
-            },
-          },
-        },
+        testFileId: testFile.id,
       },
       update: {
         name: args.requestName,
-        preRequest:
-          args.preRequest == null
-            ? undefined
-            : {
-                connectOrCreate: {
-                  where: {},
-                  create: {
-                    url: args.preRequest.url,
-                    method: args.preRequest.method,
-                    headers: args.preRequest.headers,
-                  },
-                },
-              },
         preRequestCallback: args.preRequestCallback,
-        request: {
-          connectOrCreate: {
-            where: {},
+        testCallback: args.testCallback,
+        testFileId: testFile.id,
+      },
+    });
+    const preRequest =
+      args.preRequest == null
+        ? undefined
+        : await context.prisma.preRequestData.upsert({
+            where: {
+              testRequestId: testRequest.id,
+            },
+            create: {
+              url: args.preRequest.url,
+              method: args.preRequest.method,
+              headers: args.preRequest.headers,
+              testRequestId: testRequest.id,
+            },
+            update: {
+              url: args.preRequest.url,
+              method: args.preRequest.method,
+              headers: args.preRequest.headers,
+              testRequestId: testRequest.id,
+            },
+          });
+    const request =
+      args.request == null
+        ? undefined
+        : await context.prisma.requestData.upsert({
+            where: {
+              testRequestId: testRequest.id,
+            },
             create: {
               url: args.request.url,
               method: args.request.method,
               headers: args.request.headers,
+              testRequestId: testRequest.id,
             },
-          },
-        },
-        response: {
-          connectOrCreate: {
-            where: {},
-            create: {
-              url: args.response.url,
-              body: args.response.body,
-              status: args.response.status,
-              headers: args.response.headers,
+            update: {
+              url: args.request.url,
+              method: args.request.method,
+              headers: args.request.headers,
+              testRequestId: testRequest.id,
             },
-          },
-        },
-        testCallback: args.testCallback,
+          });
+    const response = await context.prisma.responseData.upsert({
+      where: {
+        testRequestId: testRequest.id,
+      },
+      create: {
+        url: args.response.url,
+        body: args.response.body,
+        status: args.response.status,
+        headers: args.response.headers,
+        testRequestId: testRequest.id,
+      },
+      update: {
+        url: args.response.url,
+        body: args.response.body,
+        status: args.response.status,
+        headers: args.response.headers,
+        testRequestId: testRequest.id,
       },
     });
 
